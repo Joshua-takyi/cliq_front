@@ -10,8 +10,8 @@ interface ProductCardProps {
 }
 
 export function ProductCard({ product }: ProductCardProps) {
-  const { _id, title, price, images, rating, discount, isOnSale, slug } =
-    product;
+  const { id, title, price, images, rating, discount, isOnSale, slug } =
+    product; // Updated `_id` to `id`
 
   // Calculate discounted price
   const discountedPrice =
@@ -22,7 +22,7 @@ export function ProductCard({ product }: ProductCardProps) {
   const formattedDiscountedPrice = formatPrice(discountedPrice);
 
   // Product URL
-  const productUrl = `/product/${slug || _id}`;
+  const productUrl = `/product/${slug || id}`;
 
   return (
     <div className="group relative bg-white rounded-lg shadow-sm hover:shadow-md transition-shadow duration-300 overflow-hidden">
@@ -41,8 +41,8 @@ export function ProductCard({ product }: ProductCardProps) {
         <ResponsiveLazyImage
           src={images[0] || "/images/placeholder.png"}
           alt={title}
-          sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
-          className="object-cover transition-transform duration-300 group-hover:scale-105"
+          sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw" // Ensure responsive behavior
+          className="object-cover w-full h-auto transition-transform duration-300 group-hover:scale-105" // Maintain aspect ratio and add hover effect
           data-src={images[0] || "/images/placeholder.png"}
         />
 

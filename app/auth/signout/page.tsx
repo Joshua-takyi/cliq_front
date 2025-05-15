@@ -4,52 +4,81 @@ import { signOut } from "next-auth/react";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
+import {
+  AlertDialog,
+  AlertDialogTrigger,
+  AlertDialogContent,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogCancel,
+  AlertDialogAction,
+} from "@/components/ui/alert-dialog";
 
-export default function SignOutPage() {
-  const [isLoading, setIsLoading] = useState(false);
+export default function SignOutDialog() {
+  const [isLoading, setIsLoading] = useState(false); // Track loading state for sign out
   const router = useRouter();
 
+  // Handles the sign out process using next-auth
   const handleSignOut = async () => {
     setIsLoading(true);
     try {
-      await signOut({ callbackUrl: "/" });
+      await signOut({ callbackUrl: "/" }); // Redirect to home after sign out
     } catch (error) {
-      console.error("Sign out error:", error);
+      console.error("Sign out error:", error); // Log any errors
     } finally {
       setIsLoading(false);
     }
   };
 
+  // Handles cancel action, navigates back to home
   const handleCancel = () => {
     router.push("/");
   };
 
   return (
-    <div className="flex min-h-screen flex-col items-center justify-center bg-gray-50">
-      <div className="w-full max-w-md space-y-8 rounded-lg bg-white p-6 shadow-md">
-        <div className="text-center">
-          <h2 className="mt-6 text-3xl font-bold text-gray-900">Sign out</h2>
-          <p className="mt-2 text-sm text-gray-600">
+    <AlertDialog open>
+      {/* Dialog content with responsive max width and rounded corners for a modern look */}
+      <AlertDialogContent className="max-w-md w-full rounded-xl shadow-lg">
+        <AlertDialogHeader>
+          {/* Title styled for prominence */}
+          <AlertDialogTitle className="text-xl font-semibold text-gray-900">
+            Sign out
+          </AlertDialogTitle>
+          {/* Description with subtle color for clarity */}
+          <AlertDialogDescription className="text-gray-600">
             Are you sure you want to sign out?
-          </p>
-        </div>
-
-        <div className="mt-8 flex space-x-4">
-          <Button
-            onClick={handleCancel}
-            className="flex-1 rounded-md border border-gray-300 bg-white py-2 px-4 text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
-          >
-            Cancel
-          </Button>
-          <Button
-            onClick={handleSignOut}
-            disabled={isLoading}
-            className="flex-1 rounded-md border border-transparent bg-red-600 py-2 px-4 text-sm font-medium text-white hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2"
-          >
-            {isLoading ? "Signing out..." : "Sign Out"}
-          </Button>
-        </div>
-      </div>
-    </div>
+          </AlertDialogDescription>
+        </AlertDialogHeader>
+        <AlertDialogFooter className="flex flex-col gap-2 sm:flex-row sm:gap-4">
+          {/* Cancel button styled to fill width on mobile, inline on desktop */}
+          <AlertDialogCancel asChild>
+            <Button
+              variant="outline"
+              onClick={handleCancel}
+              className="w-full sm:w-auto"
+            >
+              Cancel
+            </Button>
+          </AlertDialogCancel>
+          {/* Action button triggers sign out and shows loading state */}
+          <AlertDialogAction asChild>
+            <Button
+              variant="destructive"
+              onClick={handleSignOut}
+              disabled={isLoading}
+              className="w-full sm:w-auto"
+            >
+              {isLoading ? "Signing out..." : "Sign Out"}
+            </Button>
+          </AlertDialogAction>
+        </AlertDialogFooter>
+      </AlertDialogContent>
+    </AlertDialog>
   );
 }
+
+// This component uses a responsive flexbox layout to center the modal on all devices.
+// The AlertDialogContent is styled for a modern, clean appearance with rounded corners and shadow.
+// Button layout adapts for mobile (stacked) and desktop (inline) for better usability.

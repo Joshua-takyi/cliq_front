@@ -4,7 +4,7 @@ import "./globals.css";
 import { AuthProvider } from "./providers";
 import { QueryProvider } from "@/providers/Query";
 import { Toaster } from "sonner";
-
+import localfonts from "next/font/local";
 const geistSans = Geist({
   variable: "--font-geist-sans",
   subsets: ["latin"],
@@ -15,6 +15,11 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
+const geo = localfonts({
+  src: "../fonts/geo.woff2",
+  variable: "--font-clen",
+  display: "swap",
+});
 const title = "cliq";
 export const metadata: Metadata = {
   title: title,
@@ -29,7 +34,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+        className={`${geistSans.variable} ${geistMono.variable}  ${geo.className} antialiased`}
       >
         <Toaster richColors={true} position="top-right" />
         <QueryProvider>

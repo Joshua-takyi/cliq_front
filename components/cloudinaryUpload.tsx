@@ -69,13 +69,13 @@ export const FormImageUpload = ({
                   className="object-cover w-full h-full"
                 />
               </div>
-              <Button
+              <button
                 type="button"
                 onClick={() => onDeleteImage(index)}
                 className="absolute top-2 right-2 bg-white/90 text-red-500 rounded-full p-2 opacity-0 group-hover:opacity-100 transition-all duration-200 hover:bg-white"
               >
                 <XMarkIcon className="h-4 w-4" />
-              </Button>
+              </button>
             </div>
           ))}
         </div>

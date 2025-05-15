@@ -26,19 +26,21 @@ const ResponsiveLazyImage = ({
   height,
   sizes = "100vw",
 }: LazyImageProps) => {
-  const placeholderSrc =
-    "data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==";
-
+  // Use React's loading="lazy" for native lazy loading instead of a custom solution
   return (
     <img
-      className={`lazyload ${className || ""}`}
-      src={placeholderSrc}
-      data-srcset={srcset} // Multiple resolution options
-      data-src={src} // Fallback src
-      data-sizes={sizes} // Could be "auto" or custom sizes
+      className={`max-w-full h-auto ${className || ""}`} // Ensure images are responsive by default
+      src={src} // Direct source instead of placeholder
+      srcSet={srcset} // Use standard srcSet (with capital S)
+      sizes={sizes}
       width={width}
       height={height}
       alt={alt || ""}
+      loading="lazy" // Native lazy loading
+      onError={(e) => {
+        // Handle image loading errors gracefully
+        e.currentTarget.src = "/images/placeholder.png"; // Fallback to a placeholder image
+      }}
     />
   );
 };
