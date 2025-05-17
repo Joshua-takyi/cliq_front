@@ -1,110 +1,84 @@
-import Link from "next/link";
-import { Heart, ShoppingCart, Star } from "lucide-react";
-// import { LazyImage } from "./LazyImage";
-import formatPrice from "@/libs/helpers";
-import { ProductProps } from "@/types/product_types";
-import ResponsiveLazyImage from "./lazyImage";
+"use client";
 
-interface ProductCardProps {
-  product: ProductProps;
+// Removed unused useState import as no local state is used in this component
+import Link from "next/link";
+import ResponsiveLazyImage from "./lazyImage";
+// import { useRouter } from "next/navigation";
+
+// Helper Functions
+const formatPrice = (price: number, currency = "GHS"): string => {
+  return new Intl.NumberFormat("en-GH", {
+    style: "currency",
+    currency,
+  }).format(price);
+};
+
+const formatName = (title: string): string => {
+  return title.length > 50 ? `${title.slice(0, 50)}...` : title;
+};
+
+// Props Interface
+export interface ProductCardProps {
+  product: {
+    title: string;
+    price: number;
+    images: string | string[];
+    slug: string;
+    colors?: string | string[];
+    model?: string;
+    isNew?: boolean;
+    className?: string;
+  };
 }
 
-export function ProductCard({ product }: ProductCardProps) {
-  const { id, title, price, images, rating, discount, isOnSale, slug } =
-    product; // Updated `_id` to `id`
+const ProductCard = ({ product }: ProductCardProps) => {
+  const { title, price, images, slug, isNew, className = "" } = product;
 
-  // Calculate discounted price
-  const discountedPrice =
-    isOnSale && discount ? price - (price * discount) / 100 : price;
-
-  // Format for display
-  const formattedPrice = formatPrice(price);
-  const formattedDiscountedPrice = formatPrice(discountedPrice);
-
-  // Product URL
-  const productUrl = `/product/${slug || id}`;
+  const imageArray = Array.isArray(images) ? images : [images];
 
   return (
-    <div className="group relative bg-white rounded-lg shadow-sm hover:shadow-md transition-shadow duration-300 overflow-hidden">
-      {/* Sale badge */}
-      {isOnSale && discount && (
-        <div className="absolute top-2 right-2 z-10 bg-red-500 text-white text-xs font-bold px-2 py-1 rounded-full">
-          {discount}% OFF
+    <Link
+      href={`/product/${slug}`}
+      className={`group relative block w-full bg-transparent border ${className}`}
+    >
+      <div className="relative ">
+        <div className="relative aspect-[3/4] w-full overflow-hidden">
+          <ResponsiveLazyImage
+            src={imageArray[0]}
+            alt={title}
+            sizes="(max-width: 640px) 90vw, (max-width: 768px) 50vw, (max-width: 1024px) 33vw, 25vw"
+            className="object-cover transition-opacity duration-500 ease-in-out imgBg aspect-square absolute inset-0 w-full h-full group-hover:opacity-0"
+          />
+          {imageArray.length > 1 && (
+            <ResponsiveLazyImage
+              src={imageArray[1]}
+              alt={`${title} - alternate view`}
+              sizes="(max-width: 640px) 90vw, (max-width: 768px) 50vw, (max-width: 1024px) 33vw, 25vw"
+              className="object-cover transition-opacity duration-500 ease-in-out imgBg aspect-square absolute inset-0 w-full h-full opacity-0 group-hover:opacity-100"
+            />
+          )}
         </div>
-      )}
 
-      {/* Product image */}
-      <Link
-        href={productUrl}
-        className="relative block aspect-square overflow-hidden"
-      >
-        <ResponsiveLazyImage
-          src={images[0] || "/images/placeholder.png"}
-          alt={title}
-          sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw" // Ensure responsive behavior
-          className="object-cover w-full h-auto transition-transform duration-300 group-hover:scale-105" // Maintain aspect ratio and add hover effect
-          data-src={images[0] || "/images/placeholder.png"}
-        />
-
-        {/* Quick action buttons that appear on hover */}
-        <div className="absolute inset-0 bg-black/0 group-hover:bg-black/5 transition-colors duration-300 flex items-center justify-center opacity-0 group-hover:opacity-100">
-          <div className="flex gap-2">
-            <button className="rounded-full">
-              <ShoppingCart className="h-4 w-4" />
-              <span className="sr-only">Add to cart</span>
-            </button>
-            <button className="rounded-full">
-              <Heart className="h-4 w-4" />
-              <span className="sr-only">Add to wishlist</span>
-            </button>
-          </div>
-        </div>
-      </Link>
-
-      {/* Product details */}
-      <div className="p-4">
-        <Link href={productUrl} className="block">
-          <h3 className="font-medium text-gray-900 line-clamp-1 group-hover:text-primary transition-colors duration-200">
-            {title}
-          </h3>
-        </Link>
-
-        {/* Rating */}
-        {rating !== undefined && (
-          <div className="flex items-center mt-1">
-            {[...Array(5)].map((_, i) => (
-              <Star
-                key={i}
-                className={`h-3.5 w-3.5 ${
-                  i < Math.floor(rating)
-                    ? "text-yellow-400 fill-yellow-400"
-                    : "text-gray-300"
-                }`}
-              />
-            ))}
-            <span className="text-xs text-gray-500 ml-1">
-              ({rating.toFixed(1)})
+        {isNew && (
+          <div className="absolute left-0 top-0 bg-black px-2 py-1">
+            <span className="text-xs font-medium uppercase text-white">
+              New
             </span>
           </div>
         )}
+      </div>
 
-        {/* Price */}
-        <div className="mt-2 flex items-center gap-2">
-          <span
-            className={`font-semibold ${
-              isOnSale && discount ? "text-red-600" : "text-gray-900"
-            }`}
-          >
-            {formattedDiscountedPrice}
-          </span>
-
-          {isOnSale && discount && (
-            <span className="text-sm text-gray-500 line-through">
-              {formattedPrice}
-            </span>
-          )}
+      <div className="border-t border-gray-200 p-4 space-y-5">
+        <h3 className="text-xs md:text-sm  font-normal text-gray-900 mb-2">
+          {formatName(title)}
+        </h3>
+        <div className="flex items-center justify-between">
+          <p className="md:text-sm text-xs font-bold text-gray-900">
+            {formatPrice(price)}
+          </p>
         </div>
       </div>
-    </div>
+    </Link>
   );
-}
+};
+export default ProductCard;

@@ -38,3 +38,16 @@ export interface ApiResponse<T> {
   duration?: string;
   error?: string;
 }
+
+export interface CartData {
+  items: {
+    color: string;
+    slug: string;
+    model: string;
+    image: string;
+    total_price: number;
+    quantity: number;
+    product_Id: string;
+  }[];
+  total_amount: number;
+}

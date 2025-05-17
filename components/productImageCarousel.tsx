@@ -7,13 +7,22 @@ import ResponsiveLazyImage from "./lazyImage";
 interface ImageCarouselProps {
   images: string[];
   alt: string;
+  onActiveIndexChange?: (index: number) => void; // New callback prop
 }
 
 export const ImageCarousel: React.FC<ImageCarouselProps> = ({
   images = [],
   alt = "",
+  onActiveIndexChange,
 }) => {
   const [activeIndex, setActiveIndex] = useState(0);
+
+  // Call the parent's callback whenever activeIndex changes
+  useEffect(() => {
+    if (onActiveIndexChange) {
+      onActiveIndexChange(activeIndex);
+    }
+  }, [activeIndex, onActiveIndexChange]);
 
   // Updated fade transition variants
   const fadeVariants = {
@@ -65,11 +74,13 @@ export const ImageCarousel: React.FC<ImageCarouselProps> = ({
   const thumbnails = useMemo(
     () =>
       images.map((image, index) => (
-        <div key={index} className="relative flex-shrink-0">
+        <div key={index} className="relative flex-shrink-0 thumbnail-container">
           <motion.button
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
-            onClick={() => {
+            onClick={(e) => {
+              // Prevent propagation to parent containers
+              e.stopPropagation();
               // setDirection(index > activeIndex ? 1 : -1);
               setActiveIndex(index);
             }}
@@ -112,7 +123,7 @@ export const ImageCarousel: React.FC<ImageCarouselProps> = ({
 
   return (
     <div className="flex flex-col items-center w-full h-full space-y-1">
-      <div className="relative w-full h-[330px] md:h-[430px] lg:h-[600px] overflow-hidden">
+      <div className="relative w-full h-full min-h-[330px] md:min-h-[430px] lg:min-h-[600px] overflow-hidden">
         <AnimatePresence mode="sync">
           <motion.div
             key={activeIndex}

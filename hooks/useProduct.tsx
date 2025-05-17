@@ -10,7 +10,9 @@ export const useProduct = () => {
   const queryClient = useQueryClient();
   const { data: session } = useSession();
   const API_URL =
-    process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080/api/v1";
+    process.env.NODE_ENV == "development"
+      ? process.env.NEXT_PUBLIC_DEVELOPMENT_BACKEND_URL
+      : process.env.NEXT_PUBLIC_PRODUCTION_BACKEND_URL;
 
   // CREATE PRODUCT
   const createProduct = useMutation<
@@ -164,24 +166,13 @@ export const useProduct = () => {
     },
   });
 
+  interface ProductData {
+    count: number;
+    duration: string;
+    message: string;
+    products: ProductProps[];
+  }
   //   GET PRODUCTS
-
-  const getProducts = (limit: number, page: number) =>
-    useQuery<ProductProps[], unknown>({
-      queryKey: ["listProducts", limit, page], // Include limit and page in the queryKey
-      queryFn: async () => {
-        // Get a fresh token when making the request
-
-        const res = await axios.get<ApiResponse<ProductProps[]>>(
-          `${API_URL}/products?limit=${limit}&page=${page}` // Use limit and page in the API URL
-        );
-        // Extract and return only the product array from the API response
-        return res?.data?.product || [];
-      },
-      // Add staleTime and refetch settings to improve cache behavior
-      staleTime: 1000 * 60, // Consider data stale after 1 minute
-      refetchOnWindowFocus: true, // Refetch when the window regains focus
-    });
 
   const getProductById = (id: string) =>
     useQuery<ProductProps, unknown>({
@@ -229,11 +220,93 @@ export const useProduct = () => {
       },
     }
   );
+
+  // FILTER PRODUCTS
+  const filterProducts = (filters: any, limit: number, page: number) =>
+    useQuery({
+      queryKey: ["filterProducts", filters, limit, page],
+      queryFn: async () => {
+        // Build query parameters
+        const params = new URLSearchParams();
+
+        // Add pagination parameters
+        params.append("limit", String(limit));
+        params.append("page", String(page));
+
+        // Add filter parameters if they exist
+        if (filters.category) params.append("category", filters.category);
+        if (filters.minPrice)
+          params.append("min_price", String(filters.minPrice));
+        if (filters.maxPrice)
+          params.append("max_price", String(filters.maxPrice));
+        // Support both search and q parameters (q is used when coming from search component)
+        // If search parameter exists and is not empty or undefined, add it to the request
+        if (
+          filters.search &&
+          typeof filters.search === "string" &&
+          filters.search.trim() !== ""
+        ) {
+          // console.log("Adding search parameter:", filters.search);
+          // Use 'q' parameter instead of 'search' for better consistency with search component
+          params.append("q", filters.search.trim());
+        } else {
+          console.log("No search parameter to add");
+        }
+        if (filters.tags) params.append("tags", filters.tags);
+        if (filters.models) params.append("models", filters.models);
+        if (filters.colors) params.append("colors", filters.colors);
+        if (filters.materials) params.append("materials", filters.materials);
+        if (filters.sortBy) {
+          params.append("sort_by", filters.sortBy);
+          if (filters.sortDir) params.append("sort_dir", filters.sortDir);
+        }
+
+        // Handle boolean filters
+        if (filters.isAvailable !== undefined)
+          params.append("is_available", String(filters.isAvailable));
+        if (filters.isNew !== undefined)
+          params.append("is_new", String(filters.isNew));
+        if (filters.isOnSale !== undefined)
+          params.append("is_on_sale", String(filters.isOnSale));
+        if (filters.isFeatured !== undefined)
+          params.append("is_featured", String(filters.isFeatured));
+        if (filters.isBestSeller !== undefined)
+          params.append("is_best_seller", String(filters.isBestSeller));
+
+        const res = await axios.get(
+          `${API_URL}/filter_products?${params.toString()}`
+        );
+        return res.data;
+      },
+      staleTime: 1000 * 60, // Consider data stale after 1 minute
+      refetchOnWindowFocus: true,
+    });
+
+  const getProductBySlug = (slug: string) =>
+    useQuery<ProductProps, unknown>({
+      queryKey: ["get_by_slug", slug],
+      queryFn: async () => {
+        // Make a single API request to fetch the product by slug
+        const res = await axios.get(`${API_URL}/get_product_by_slug/${slug}`);
+
+        // Check if data exists before returning
+        if (!res.data) {
+          throw new Error("Product not found");
+        }
+
+        return res.data;
+      },
+
+      refetchOnMount: false,
+      refetchOnWindowFocus: false,
+      staleTime: 5 * 60 * 1000,
+    });
   return {
     createProduct,
     updateProduct,
-    getProducts,
     getProductById,
     deleteProduct,
+    filterProducts,
+    getProductBySlug,
   };
 };

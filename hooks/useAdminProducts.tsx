@@ -10,7 +10,6 @@ interface ProductData {
 }
 
 export const useAdminProducts = (page = 1, limit = 20) => {
-  const queryClient = useQueryClient();
   const API_URL =
     process.env.NODE_ENV == "development"
       ? process.env.NEXT_PUBLIC_DEVELOPMENT_BACKEND_URL
@@ -28,10 +27,8 @@ export const useAdminProducts = (page = 1, limit = 20) => {
       }
       return res.data;
     },
-    // Add these options to improve refetching behavior
     refetchOnWindowFocus: true,
     staleTime: 1000 * 30, // 30 seconds
-    // This ensures that when returning to the admin page, data will be refetched
     refetchOnMount: "always",
   });
 };

@@ -1,12 +1,12 @@
 "use client";
-import { useSearchParams } from "next/navigation";
+import Grid from "@/components/grid";
 
 export default function Collections() {
-  const searchParams = useSearchParams();
-  const category = searchParams.get("category");
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen py-2">
-      <h1 className="text-3xl font-bold">{category}</h1>
+    <div className="container mx-auto px-4 py-8">
+      <div className="mt-8">
+        <Grid />
+      </div>
     </div>
   );
 }

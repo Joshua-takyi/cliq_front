@@ -47,7 +47,7 @@ export const DynamicList = ({
   // Handle adding a selected item from dropdown
   const handleAddSelectedItem = () => {
     if (selectedOption) {
-      onAddItem(selectedOption);
+      onAddItem(selectedOption); // This now passes the ID instead of the name
       setSelectedOption("");
     }
   };
@@ -74,6 +74,15 @@ export const DynamicList = ({
     if (allowCustom && options.length > 0) {
       setInputMode(inputMode === "select" ? "text" : "select");
     }
+  };
+
+  // Helper function to get display name from ID when options are available
+  const getDisplayName = (id: string): string => {
+    if (options.length > 0) {
+      const option = options.find((opt) => opt.id === id);
+      return option ? option.name : id; // Fall back to ID if no matching option found
+    }
+    return id; // If no options provided, just use the ID
   };
 
   return (
@@ -114,7 +123,8 @@ export const DynamicList = ({
             >
               <option value="">Select {title.toLowerCase()}...</option>
               {options.map((option) => (
-                <option key={option.id} value={option.name}>
+                // Modified to store ID as value, not the name
+                <option key={option.id} value={option.id}>
                   {option.name}
                 </option>
               ))}
@@ -144,12 +154,15 @@ export const DynamicList = ({
               key={index}
               className="flex items-center gap-2 bg-blue-50 text-blue-600 px-4 py-2 rounded-lg border border-blue-100"
             >
-              <span className="text-sm font-medium">{item}</span>
+              {/* Display the friendly name if options are available, otherwise just show the ID */}
+              <span className="text-sm font-medium">
+                {getDisplayName(item)}
+              </span>
               <button
                 type="button"
                 onClick={() => onDeleteItem(index)}
                 className="hover:bg-blue-100 rounded-full p-1"
-                aria-label={`Remove ${item}`}
+                aria-label={`Remove ${getDisplayName(item)}`}
               >
                 <X size={16} />
               </button>

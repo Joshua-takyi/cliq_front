@@ -225,6 +225,7 @@ export default function ProductForm({
   const handleAddArrayItem = (field: keyof ProductProps, item: string) => {
     setFormData((prev) => {
       const currentArray = Array.isArray(prev[field]) ? prev[field] : [];
+      // Store the item (which is now the ID when coming from the dropdown selection)
       if (!currentArray.includes(item)) {
         return { ...prev, [field]: [...currentArray, item] };
       }

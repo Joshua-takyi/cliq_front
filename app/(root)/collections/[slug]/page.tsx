@@ -1,17 +1,20 @@
-import CollectionHeader from "@/components/CollectionHeader";
+"use client";
 
-interface CollectionPageProps {
-  params: { slug: string };
-}
-
-export default async function CollectionPage({ params }: CollectionPageProps) {
-  const resolvedParams = await params;
-  const { slug } = resolvedParams;
+import { useParams } from "next/navigation";
+import Grid from "@/components/grid";
+import CollectionHeader from "@/components/CollectionHead";
+export default function CollectionPage() {
+  // Get the slug from the URL parameters
+  const params = useParams();
+  const slug = params.slug as string;
 
   return (
-    <main>
-      {/* Pass the slug to the CollectionHeader component as required */}
+    <div className="max-w-[100rem] mx-auto px-4 py-8">
+      {/* Product grid with filtering */}
       <CollectionHeader params={{ slug }} />
-    </main>
+      <div className="">
+        <Grid />
+      </div>
+    </div>
   );
 }

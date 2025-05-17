@@ -1,14 +1,36 @@
+"use client";
+
 import { Heart } from "lucide-react"; // Using Heart icon for wishlist
 import { motion } from "framer-motion";
 import { useState, useEffect } from "react";
 
 export const Wishlist = () => {
   const [isOpen, setIsOpen] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
 
   // Toggle wishlist panel visibility
   const toggleWishlist = () => {
     setIsOpen(!isOpen);
   };
+
+  // Detect mobile screen size
+  useEffect(() => {
+    // Check if the window width is less than 768px
+    const handleResize = () => {
+      setIsMobile(window.innerWidth < 768);
+    };
+
+    // Set initial state
+    handleResize();
+
+    // Add event listener for window resize
+    window.addEventListener("resize", handleResize);
+
+    // Clean up event listener when component unmounts
+    return () => {
+      window.removeEventListener("resize", handleResize);
+    };
+  }, []); // Empty dependency array ensures this runs once on mount
 
   // Handle ESC key press to close the wishlist panel
   useEffect(() => {
@@ -32,17 +54,18 @@ export const Wishlist = () => {
       {/* Wishlist trigger button with icon and label */}
       <div
         onClick={toggleWishlist}
-        className="flex items-center cursor-pointer gap-2 px-3 py-2 text-gray-700 hover:text-gray-900 transition-colors"
+        className="flex items-center cursor-pointer gap-1 md:gap-2 px-1 md:px-3 py-1 md:py-2 text-gray-700 hover:text-gray-900 transition-colors"
         aria-label="Open wishlist"
       >
-        <Heart size={20} />
-        <span>Wishlist</span>
+        <Heart size={isMobile ? 18 : 20} />
+        {/* Hide label on mobile for better spacing */}
+        <span className="hidden md:inline">Wishlist</span>
       </div>
 
       {/* Overlay that appears when wishlist is open */}
       {isOpen && (
         <div
-          className="fixed inset-0  backdrop-blur-xs  z-40"
+          className="fixed inset-0 backdrop-blur-xs z-40"
           onClick={toggleWishlist}
         ></div>
       )}
@@ -65,7 +88,7 @@ export const Wishlist = () => {
           bottom: 0,
           zIndex: 50,
         }}
-        className="w-[85%] sm:w-[50%] md:w-[35%] lg:w-[30%] xl:w-[25%] bg-[#f8f8f8] border-l border-black h-full"
+        className="w-[85%] sm:w-[50%] md:w-[35%] lg:w-[30%] xl:w-[25%] bg-customBackground border-l border-black/40 h-full"
       >
         <div className="p-6 h-full flex flex-col">
           <div className="flex items-center justify-between mb-6">
