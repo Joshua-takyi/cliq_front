@@ -1,4 +1,4 @@
-import { TopHeader } from "@/components/header";
+import Footer from "@/components/footer";
 import { Nav } from "@/components/nav";
 
 export default function RootLayout({
@@ -7,10 +7,14 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <div>
+    <div className="flex flex-col min-h-screen">
       {/* <TopHeader /> */}
       <Nav />
-      <main>{children}</main>
+
+      {/* main flex‑grows to fill leftover space */}
+      <main className="flex-grow">{children}</main>
+
+      <Footer />
     </div>
   );
 }

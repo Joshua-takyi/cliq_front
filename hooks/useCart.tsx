@@ -4,6 +4,7 @@ import { CartData } from "@/types/product_types";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import axios from "axios";
 import { useSession } from "next-auth/react";
+import { toast } from "sonner";
 
 export interface CartProps {
   color: string;
@@ -36,32 +37,59 @@ export const UseCart = () => {
       }
     },
   });
-  const RemoveFromCart = async () => {
-    useMutation({
-      mutationKey: ["removeFromCart"],
-      mutationFn: async (data: CartProps) => {
-        const res = await axios.delete(`${API_URL}/cart`, { data });
-        if (!res.data) {
-          throw new Error("No data found");
-        }
-        return res.data;
-      },
-      onSuccess: (data) => {
-        if (data) {
-          queryClient.invalidateQueries({ queryKey: ["cart"] });
-        }
-      },
-    });
-  };
-  const UpdateCart = async () => {
-    useMutation({
-      mutationKey: ["updateCart"],
-      mutationFn: async (data: CartProps) => {
-        const res = await axios.put(`${API_URL}/cart`, data);
-        return res.data;
-      },
-    });
-  };
+
+  interface RemoveFromCartProps {
+    id: string; // Changed from product_Id to id to match the cart item's unique ID
+  }
+  const RemoveFromCart = useMutation({
+    mutationFn: async (data: RemoveFromCartProps) => {
+      const res = await axios.delete(`${API_URL}/protected/remove_from_cart`, {
+        data,
+        headers: {
+          Authorization: `Bearer ${session?.user?.token}`,
+        },
+        withCredentials: true,
+      });
+      return res.data;
+    },
+    onSuccess: (data) => {
+      toast.success("Item removed from cart successfully");
+      if (data) {
+        queryClient.invalidateQueries({ queryKey: ["get_cart"] });
+      }
+    },
+  });
+
+  // Update cart item
+  interface UpdateCartProps {
+    action: string;
+    quantity: number;
+    color: string;
+    product_Id: string; // Changed back to match the CartData interface
+  }
+  const UpdateCart = useMutation({
+    mutationKey: ["update_cart"],
+    mutationFn: async (data: UpdateCartProps) => {
+      const res = await axios.patch(`${API_URL}/protected/update_cart`, data, {
+        headers: {
+          Authorization: `Bearer ${session?.user?.token}`,
+        },
+        withCredentials: true,
+      });
+      return res.data;
+    },
+    onSuccess: (data) => {
+      toast.success("Cart updated successfully");
+      if (data) {
+        queryClient.invalidateQueries({ queryKey: ["get_cart"] });
+      }
+    },
+
+    onError: (error) => {
+      toast.error("Failed to update cart");
+    },
+  });
+
   const ClearCart = async () => {
     useMutation({});
   };
@@ -89,3 +117,4 @@ export const UseCart = () => {
     GetCart,
   };
 };
+``;

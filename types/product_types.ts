@@ -41,9 +41,11 @@ export interface ApiResponse<T> {
 
 export interface CartData {
   items: {
+    id: string;
     color: string;
     slug: string;
     model: string;
+    title: string;
     image: string;
     total_price: number;
     quantity: number;

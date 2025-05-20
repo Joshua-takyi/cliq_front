@@ -80,7 +80,7 @@ export default function SearchPage() {
   };
 
   return (
-    <div className="py-10">
+    <div className="max-w-[100rem] mx-auto px-4 py-8">
       {/* Page heading that displays the search query if available */}
       <div className="text-center mb-8">
         <h1 className="text-xl mb-6">

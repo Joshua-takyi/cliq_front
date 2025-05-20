@@ -125,7 +125,7 @@ export const Search = () => {
           {/* Using flex-col and flex-1 to control vertical spacing */}
           <form
             onSubmit={handleSearch}
-            className="flex items-center justify-between border-b-1 mb-4"
+            className="flex items-center justify-between border-b-1  mb-4"
           >
             <input
               type="text"

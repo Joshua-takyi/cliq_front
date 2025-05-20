@@ -1,7 +1,5 @@
 "use client";
 
-import Image from "next/image";
-import { useState } from "react";
 import { CartData } from "../types/product_types";
 import ResponsiveLazyImage from "./lazyImage";
 import Link from "next/link";
@@ -14,7 +12,6 @@ interface CartCardProps {
     color: string,
     model: string
   ) => void;
-  onRemoveItem: (productId: string, color: string, model: string) => void;
 }
 
 export default function CartCard({
@@ -34,12 +31,6 @@ export default function CartCard({
     }).format(price);
   };
 
-  function formatedName(slug: string): React.ReactNode {
-    return slug
-      .split("-")
-      .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
-      .join(" ");
-  }
   return (
     <Link
       href={`/product/${slug}`}
@@ -75,7 +66,7 @@ export default function CartCard({
         <div>
           <div className="flex justify-between  flex-col items-start mb-1">
             <h3 className="text-sm font-medium text-gray-800 truncate max-w-[180px]">
-              {formatedName(cartDetails.items[0].slug)}
+              {cartDetails.items[0].title}
             </h3>
             <span className="font-medium text-sm text-gray-900">
               {formatPrice(total_price)}

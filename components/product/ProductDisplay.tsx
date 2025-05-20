@@ -12,6 +12,7 @@ import { Textarea } from "../ui/textarea";
 import { toast } from "sonner";
 import { UseCart } from "@/hooks/useCart";
 import { Accordion } from "../ui/accordion"; // Import the new Accordion component
+import RelatedProducts from "./RelatedProducts";
 
 interface ProductDisplayProps {
   product: ProductProps;
@@ -295,14 +296,14 @@ const ProductDisplay: React.FC<ProductDisplayProps> = ({ product }) => {
   return (
     <div className="max-w-[100rem] mx-auto px-4 py-8">
       {/* Product main section with image and details */}
-      <div className="flex flex-col md:flex-row gap-8 mb-8">
-        {/* Left side - Product images */}
-        <div className="w-full md:w-1/2">
+      <div className="flex flex-col lg:flex-row gap-8 mb-8">
+        {/* Left side - Product images - Only displays in row format on lg screens and above */}
+        <div className="w-full lg:w-1/2">
           <ProductImageSection images={product.images} title={product.title} />
         </div>
 
         {/* Right side - Product info and actions */}
-        <div className="w-full md:w-1/2">
+        <div className="w-full lg:w-1/2">
           {/* Product badges and title section */}
           <div className="mb-6">
             {/* Product badges display */}
@@ -742,9 +743,8 @@ const ProductDisplay: React.FC<ProductDisplayProps> = ({ product }) => {
         </div>
       </div>
 
-      {/* Customer Review Section as a separate section below product info */}
       <div className="mt-8  border-gray-200 pt-6">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8"></div>
+        <RelatedProducts productId={product.id || ""} />
       </div>
     </div>
   );

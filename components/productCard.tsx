@@ -22,6 +22,7 @@ export interface ProductCardProps {
   product: {
     title: string;
     price: number;
+    id?: string | null;
     images: string | string[];
     slug: string;
     colors?: string | string[];
@@ -39,10 +40,10 @@ const ProductCard = ({ product }: ProductCardProps) => {
   return (
     <Link
       href={`/product/${slug}`}
-      className={`group relative block w-full bg-transparent border ${className}`}
+      className={`group relative block w-full bg-transparent border border-black/50 ${className}`}
     >
-      <div className="relative ">
-        <div className="relative aspect-[3/4] w-full overflow-hidden">
+      <div className="relative  ">
+        <div className="relative  aspect-[3/4] w-full overflow-hidden border border-black/50 ">
           <ResponsiveLazyImage
             src={imageArray[0]}
             alt={title}
@@ -70,7 +71,7 @@ const ProductCard = ({ product }: ProductCardProps) => {
 
       <div className="border-t border-gray-200 p-4 space-y-5">
         <h3 className="text-xs md:text-sm  font-normal text-gray-900 mb-2">
-          {formatName(title)}
+          {title}
         </h3>
         <div className="flex items-center justify-between">
           <p className="md:text-sm text-xs font-bold text-gray-900">

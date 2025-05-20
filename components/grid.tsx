@@ -53,11 +53,31 @@ export default function Grid() {
   };
 
   // Handle loading state
+  if (isLoading) {
+    return (
+      <div className="flex justify-center items-center h-64">
+        <div className="text-center">
+          <div className="w-12 h-12 border-t-2 border-b-2 border-gray-900 rounded-full animate-spin mx-auto mb-4"></div>
+          <h1 className="text-xl font-medium text-gray-700">
+            Loading products...
+          </h1>
+        </div>
+      </div>
+    );
+  }
 
+  // Only check for empty products after loading is complete
   if (products.length === 0) {
     return (
-      <div className="flex justify-center items-center h-screen">
-        <h1 className="text-2xl font-bold text-gray-500">No products found</h1>
+      <div className="flex justify-center items-center h-64">
+        <div className="text-center">
+          <h1 className="text-2xl font-bold text-gray-500">
+            No products found
+          </h1>
+          <p className="text-gray-400 mt-2">
+            Try adjusting your filters or search terms
+          </p>
+        </div>
       </div>
     );
   }
@@ -66,11 +86,6 @@ export default function Grid() {
   return (
     <div>
       {/* Filter button and active filter indicators */}
-      {isLoading && (
-        <div>
-          <h1 className="text-2xl font-bold text-gray-500">Loading...</h1>
-        </div>
-      )}
       <div className="flex justify-between items-center mb-6 px-4 lg:px-0">
         <div className="flex space-x-2">
           {/* Filter tags to show active filters */}
@@ -102,7 +117,7 @@ export default function Grid() {
       </div>
 
       {/* Products grid */}
-      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 px-1 gap-2 lg:px-0">
+      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 px-1 gap-2  lg:px-0">
         {products?.map((product: ProductProps) => (
           <ProductCard
             key={product.id} // Use the unique product ID as the key

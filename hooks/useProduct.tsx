@@ -261,17 +261,36 @@ export const useProduct = () => {
           if (filters.sortDir) params.append("sort_dir", filters.sortDir);
         }
 
-        // Handle boolean filters
+        // Handle boolean filters - supporting both camelCase and snake_case naming conventions
         if (filters.isAvailable !== undefined)
           params.append("is_available", String(filters.isAvailable));
+        if (filters.is_available !== undefined)
+          // Support for snake_case version
+          params.append("is_available", String(filters.is_available));
+
         if (filters.isNew !== undefined)
           params.append("is_new", String(filters.isNew));
+        if (filters.is_new !== undefined)
+          // Support for snake_case version
+          params.append("is_new", String(filters.is_new));
+
         if (filters.isOnSale !== undefined)
           params.append("is_on_sale", String(filters.isOnSale));
+        if (filters.is_on_sale !== undefined)
+          // Support for snake_case version
+          params.append("is_on_sale", String(filters.is_on_sale));
+
         if (filters.isFeatured !== undefined)
           params.append("is_featured", String(filters.isFeatured));
+        if (filters.is_featured !== undefined)
+          // Support for snake_case version
+          params.append("is_featured", String(filters.is_featured));
+
         if (filters.isBestSeller !== undefined)
           params.append("is_best_seller", String(filters.isBestSeller));
+        if (filters.is_best_seller !== undefined)
+          // Support for snake_case version
+          params.append("is_best_seller", String(filters.is_best_seller));
 
         const res = await axios.get(
           `${API_URL}/filter_products?${params.toString()}`
@@ -301,9 +320,20 @@ export const useProduct = () => {
       refetchOnWindowFocus: false,
       staleTime: 5 * 60 * 1000,
     });
+
+  const getsimilarProducts = (slug: string) => {
+    useQuery<ProductProps, unknown>({
+      queryKey: ["get_similar_products", slug],
+      queryFn: async () => {
+        const res = await axios.get(`${API_URL}/get_similar_products/${slug}`);
+        return res.data;
+      },
+    });
+  };
   return {
     createProduct,
     updateProduct,
+    getsimilarProducts,
     getProductById,
     deleteProduct,
     filterProducts,

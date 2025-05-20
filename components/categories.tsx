@@ -111,39 +111,66 @@ const customStyles = `
     display: none !important;
   }
   
-  /* Custom arrow styling */
+  /* Custom arrow styling - Enhanced for better visibility */
   .custom-arrow {
     position: absolute;
     top: 50%;
     transform: translateY(-50%);
     z-index: 20;
-    width: 40px;
-    height: 40px;
+    width: 44px;
+    height: 44px;
     display: flex;
     align-items: center;
     justify-content: center;
     cursor: pointer;
     background-color: white;
     border-radius: 50%;
-    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.15);
-    border: 1.5px solid #e5e7eb;
-    opacity: 0.95;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25); /* Stronger shadow for better visibility */
+    border: 2px solid #9ca3af; /* Darker border for better contrast */
+    opacity: 1; /* Full opacity for better visibility */
     transition: all 0.3s ease;
   }
   
   .custom-arrow:hover {
-    opacity: 1;
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
-    background-color: #f9fafb;
-    border-color: #d1d5db;
+    box-shadow: 0 5px 16px rgba(0, 0, 0, 0.35); /* Enhanced shadow on hover */
+    background-color: #f3f4f6;
+    border-color: #6b7280; /* Darker border on hover for emphasis */
+    transform: translateY(-50%) scale(1.05); /* Slight scale effect on hover */
   }
   
   .custom-arrow-prev {
-    left: -10px;
+    left: 8px; /* Position slightly further from edge */
   }
   
   .custom-arrow-next {
-    right: -10px;
+    right: 8px; /* Position slightly further from edge */
+  }
+  
+  /* Ensure arrows are more visible on mobile with improved positioning */
+  @media (max-width: 768px) {
+    .custom-arrow {
+      width: 40px; /* Larger size on mobile for better tap target */
+      height: 40px;
+      background-color: rgba(255, 255, 255, 0.98); /* Nearly opaque background */
+      border-width: 2px; /* Thicker border for visibility */
+    }
+    
+    .custom-arrow-prev {
+      left: 5px;
+    }
+    
+    .custom-arrow-next {
+      right: 5px;
+    }
+  }
+  
+  /* Extra styles for very small screens */
+  @media (max-width: 480px) {
+    .custom-arrow {
+      width: 38px;
+      height: 38px;
+      background-color: white;
+    }
   }
 `;
 
@@ -207,7 +234,7 @@ const categories = [
   },
   {
     id: "6",
-    title: "Headphones and Speakers",
+    title: "Headphones/Speakers",
     image: "/images/airpods-max-select-202409-midnight.png",
     href: "/collections/headphones?category=headphones",
   },
@@ -246,8 +273,12 @@ interface ArrowProps {
 const PrevArrow = (props: ArrowProps) => {
   const { className, style, onClick } = props;
   return (
-    <div className="custom-arrow custom-arrow-prev" onClick={onClick}>
-      <ChevronLeft className="h-6 w-6 text-gray-900" strokeWidth={2.5} />
+    <div
+      className="custom-arrow custom-arrow-prev"
+      onClick={onClick}
+      aria-label="Previous categories"
+    >
+      <ChevronLeft className="h-5 w-5 text-gray-800" strokeWidth={2.5} />
     </div>
   );
 };
@@ -255,8 +286,12 @@ const PrevArrow = (props: ArrowProps) => {
 const NextArrow = (props: ArrowProps) => {
   const { className, style, onClick } = props;
   return (
-    <div className="custom-arrow custom-arrow-next" onClick={onClick}>
-      <ChevronRight className="h-6 w-6 text-gray-900" strokeWidth={2.5} />
+    <div
+      className="custom-arrow custom-arrow-next"
+      onClick={onClick}
+      aria-label="Next categories"
+    >
+      <ChevronRight className="h-5 w-5 text-gray-800" strokeWidth={2.5} />
     </div>
   );
 };
@@ -291,14 +326,14 @@ const Categories = () => {
     dots: false,
     infinite: false,
     speed: 400,
-    slidesToShow: 5, // 5 items per row to match the image reference
+    slidesToShow: 5, // 5 items per row on large screens
     slidesToScroll: 5, // Scroll full rows at a time for grid-like behavior
     cssEase: "cubic-bezier(0.4, 0, 0.2, 1)", // Material design easing for smoother transitions
-    arrows: true, // Show arrows
+    arrows: true, // Show arrows by default
     initialSlide: 0,
-    swipeToSlide: false, // Disable individual item swiping to enforce row-based navigation
-    prevArrow: <PrevArrow />,
-    nextArrow: <NextArrow />,
+    swipeToSlide: true, // Enable swipe for better mobile interaction
+    prevArrow: <PrevArrow />, // Custom prev arrow
+    nextArrow: <NextArrow />, // Custom next arrow
     afterChange: (current: number) => setActiveSlide(current),
     centerMode: false, // Ensure cards are aligned to the left
     centerPadding: "0px", // No extra padding
@@ -307,21 +342,24 @@ const Categories = () => {
         breakpoint: 1600,
         settings: {
           slidesToShow: 5,
-          slidesToScroll: 2,
+          slidesToScroll: 3, // More efficient scrolling
+          arrows: true,
         },
       },
+
       {
         breakpoint: 1280,
         settings: {
           slidesToShow: 4,
           slidesToScroll: 2,
+          arrows: true,
         },
       },
       {
         breakpoint: 1024,
         settings: {
           slidesToShow: 3,
-          slidesToScroll: 3, // Scroll full rows
+          slidesToScroll: 2,
           arrows: true,
         },
       },
@@ -330,27 +368,47 @@ const Categories = () => {
         settings: {
           slidesToShow: 2, // 2 items per row on tablets
           slidesToScroll: 2, // Scroll full rows
-          arrows: false, // Hide arrows on smaller screens
+          arrows: true, // Ensure arrows are visible
         },
       },
       {
         breakpoint: 640,
         settings: {
-          slidesToShow: 1,
+          slidesToShow: 2, // Consistently show 2 items on small screens
+          slidesToScroll: 2, // Scroll 2 at a time
+          arrows: true, // Ensure arrows are always visible
+          centerMode: false,
+          centerPadding: "0px",
+        },
+      },
+      {
+        breakpoint: 480,
+        settings: {
+          slidesToShow: 2, // Maintain 2 items per view on very small screens
+          slidesToScroll: 1, // Single item scrolling for better control
+          arrows: true, // Keep arrows visible
+          centerMode: false,
+        },
+      },
+      {
+        // Ultra small screens (e.g. small smartphones)
+        breakpoint: 360,
+        settings: {
+          slidesToShow: 2, // Still maintain 2 items for consistency
           slidesToScroll: 1,
-          centerMode: true,
-          centerPadding: "30px", // Add some padding on small screens for a peek effect
+          arrows: true, // Keep arrows visible
+          centerMode: false,
         },
       },
     ],
   };
 
   return (
-    <div>
+    <div className="categories-section">
       <style jsx global>
         {customStyles}
       </style>
-      <div className="px-2">
+      <div className="px-2 sm:px-0">
         <div className="carousel-wrapper">
           <div
             className="relative carousel-container connected-carousel"

@@ -4,8 +4,12 @@ import { ShoppingBag } from "lucide-react"; // Using ShoppingBag icon for cart
 import { motion } from "framer-motion";
 import { useState, useEffect } from "react";
 import CartCard from "./cartCart"; // Import the CartCard component
-import { UseCart, CartProps } from "../hooks/useCart"; // Import the cart hook
-import { CartData, ProductProps } from "../types/product_types"; // Import product types
+import { UseCart } from "../hooks/useCart"; // Import the cart hook
+import { CartData } from "../types/product_types"; // Import product types
+import { useSession } from "next-auth/react";
+import { useCheckout } from "@/app/services/checkout";
+import Link from "next/link";
+import { formatPrice } from "@/lib/utils";
 
 export const Cart = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -18,6 +22,7 @@ export const Cart = () => {
   >([]);
   // Track if on mobile screen
 
+  const session = useSession();
   const { GetCart } = UseCart();
 
   const { data, isLoading } = GetCart;
@@ -48,8 +53,10 @@ export const Cart = () => {
           cartDetails: {
             items: [
               {
+                id: item.id,
                 color: item.color,
                 slug: item.slug,
+                title: item.title,
                 model: item.model,
                 image: item.image,
                 total_price: item.total_price,
@@ -57,10 +64,10 @@ export const Cart = () => {
                 product_Id: item.product_Id,
               },
             ],
-            total_amount: item.total_price, // Assuming total_amount is the total price of the item
+            total_amount: item.total_price,
           },
         }));
-        setCartItems(cartItems); // Update the state with the correctly typed cart items
+        setCartItems(cartItems);
       }
     } catch (error) {}
   };
@@ -75,6 +82,13 @@ export const Cart = () => {
   };
 
   // Load cart items on component mount and whenever data changes
+  useEffect(() => {
+    if (data) {
+      fetchCartItems();
+    }
+  }, [data]); // This will run whenever data changes, ensuring cart items are always up-to-date
+
+  // Existing effect for when cart is opened
   useEffect(() => {
     if (isOpen && data) {
       fetchCartItems();
@@ -166,67 +180,23 @@ export const Cart = () => {
     }
   };
 
-  // Function to remove an item from the cart
-  const removeCartItem = async (
-    productId: string,
-    color: string,
-    model: string
-  ) => {
-    try {
-      // Optimistically remove from UI
-      setCartItems((prevItems) =>
-        prevItems.filter(
-          (item) =>
-            !(
-              item.cartDetails.items.some(
-                (cartItem) => cartItem.product_Id === productId
-              ) &&
-              item.cartDetails.items.some(
-                (cartItem) => cartItem.color === color
-              ) &&
-              // Check if the model matches within the items array of cartDetails
-              item.cartDetails.items.some(
-                (cartItem) => cartItem.model === model
-              )
-            )
-        )
-      );
-
-      // Send delete request to the server
-      // This is a placeholder. In a real app, you would use the UseCart hook's
-      // remove method or define an API call to remove the cart item
-      await fetch("/api/cart/remove", {
-        method: "DELETE",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          product_Id: productId,
-          color,
-          model,
-        }),
-      });
-    } catch (error) {
-      console.error("Error removing cart item:", error);
-      // Revert the optimistic update if it fails
-      fetchCartItems();
-    }
-  };
-
-  // Format price with currency
-  const formatPrice = (price: number) => {
-    return new Intl.NumberFormat("en-US", {
-      style: "currency",
-      currency: "GHS", // Ghana Cedi (₵)
-      minimumFractionDigits: 2,
-    }).format(price);
-  };
-
+  // // Format price with currency
+  // const formatPrice = (price: number) => {
+  //   return new Intl.NumberFormat("en-US", {
+  //     style: "currency",
+  //     currency: "GHS", // Ghana Cedi (₵)
+  //     minimumFractionDigits: 2,
+  //   }).format(price);
+  // };
+  const { mutate } = useCheckout();
   // Handle checkout process
   const handleCheckout = () => {
     if (cartItems.length === 0) return;
 
-    console.log("Proceeding to checkout with items:", cartItems);
+    mutate({
+      amount: data?.total_amount || 0,
+      email: session?.data?.user?.email || "",
+    });
   };
 
   if (isLoading) {
@@ -240,19 +210,20 @@ export const Cart = () => {
   return (
     <div className="relative">
       {/* Cart trigger button with icon and label - responsive for mobile */}
-      <div
-        onClick={toggleCart}
-        className="relative flex items-center cursor-pointer gap-1 md:gap-2 px-1 md:px-3 py-1 md:py-2 text-gray-700 hover:text-gray-900 transition-colors"
-        aria-label="Open cart"
-      >
-        <ShoppingBag size={isMobile ? 24 : 22} strokeWidth={2} />
-        <span className="hidden md:inline">Cart</span>
-        {/* Badge to show the number of items in the cart */}
-        {cartItems.length > 0 && (
-          <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center">
-            {cartItems.length}
-          </span>
-        )}
+      <div className="flex items-center">
+        <div
+          onClick={toggleCart}
+          className="relative flex items-center justify-center cursor-pointer gap-1 md:gap-2 px-1 md:px-3 py-1 md:py-2 text-gray-700 hover:text-gray-900 transition-colors"
+          aria-label="Open cart"
+        >
+          <ShoppingBag size={isMobile ? 24 : 22} strokeWidth={2} />
+          <span className="hidden md:inline">Cart</span>
+          {data && data.items && data.items.length > 0 && (
+            <span className="absolute -top-1 -right-1 bg-[#9BEC00]  text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center">
+              {data.items.length}
+            </span>
+          )}
+        </div>
       </div>
 
       {isOpen && (
@@ -279,7 +250,7 @@ export const Cart = () => {
           bottom: 0,
           zIndex: 50,
         }}
-        className="w-[85%] sm:w-[50%] md:w-[50%] lg:w-[40%] xl:w-[27%] bg-customBackground border-l border-black/40 h-full"
+        className="w-[85%] sm:w-[50%] md:w-[50%] lg:w-[40%] xl:w-[22%] bg-customBackground border-l border-black/40 h-full"
       >
         <div className="p-3 h-full flex flex-col">
           <div className="flex items-center justify-between mb-6">
@@ -316,8 +287,7 @@ export const Cart = () => {
               ></motion.div>
             </button>
           </div>
-
-          {/* Cart content area */}
+          Cart content area
           <div className="flex-grow overflow-auto">
             {isLoading ? (
               <div className="flex justify-center items-center h-40">
@@ -330,7 +300,6 @@ export const Cart = () => {
                     cartDetails={item.cartDetails}
                     key={`${item.cartDetails.items[0].product_Id}-${item.cartDetails.items[0].color}-${item.cartDetails.items[0].model}`}
                     onUpdateQuantity={updateCartItemQuantity}
-                    onRemoveItem={removeCartItem}
                   />
                 ))}
               </div>
@@ -341,7 +310,6 @@ export const Cart = () => {
               </div>
             )}
           </div>
-
           {/* Summary and checkout section */}
           <div className="mt-6 pt-4 border-t border-gray-200">
             <div className="flex justify-between mb-4">
@@ -366,9 +334,14 @@ export const Cart = () => {
             >
               Checkout
             </button>
-            <button className="w-full py-3 mt-2 text-gray-800 font-medium hover:bg-gray-100 transition-colors">
-              View Cart
-            </button>
+            <Link href="/cart">
+              <button
+                className="w-full py-3 mt-2 text-gray-800 font-medium hover:bg-gray-100 transition-colors border border-gray-300"
+                disabled={cartItems.length === 0}
+              >
+                View Cart
+              </button>
+            </Link>
           </div>
         </div>
       </motion.div>
