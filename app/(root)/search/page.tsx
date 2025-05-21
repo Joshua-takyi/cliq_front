@@ -69,8 +69,8 @@ export default function SearchPage() {
   // Handle both response formats (direct or nested in data property)
   const products =
     searchResults?.data?.products || searchResults?.products || [];
-  const totalCount =
-    searchResults?.data?.totalCount || searchResults?.totalCount || 0;
+  // const totalCount =
+  //   searchResults?.data?.totalCount || searchResults?.totalCount || 0;
   const totalPages =
     searchResults?.data?.totalPages || searchResults?.totalPages || 0;
 
@@ -139,7 +139,7 @@ export default function SearchPage() {
         </div>
       ) : (
         // Display grid of product cards when we have search results
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 px-4 md:px-8">
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 px-4 md:px-8">
           {products.map((product: ProductProps) => (
             <ProductCard
               key={product.id}

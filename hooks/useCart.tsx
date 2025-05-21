@@ -32,9 +32,16 @@ export const UseCart = () => {
       return res.data;
     },
     onSuccess: (data) => {
+      toast.success("Item added to cart successfully");
       if (data) {
         queryClient.invalidateQueries({ queryKey: ["get_cart"] });
       }
+    },
+
+    onError: (error) => {
+      toast.error("Failed to add item to cart");
+      error instanceof Error && toast.error(error.message);
+      console.error("Error adding item to cart:", error.message);
     },
   });
 
@@ -63,9 +70,7 @@ export const UseCart = () => {
   // Update cart item
   interface UpdateCartProps {
     action: string;
-    quantity: number;
-    color: string;
-    product_Id: string; // Changed back to match the CartData interface
+    cart_item_id: string;
   }
   const UpdateCart = useMutation({
     mutationKey: ["update_cart"],
@@ -87,12 +92,35 @@ export const UseCart = () => {
 
     onError: (error) => {
       toast.error("Failed to update cart");
+      error instanceof Error && toast.error(error.message);
+      console.error("Error updating cart:", error.message);
     },
   });
 
-  const ClearCart = async () => {
-    useMutation({});
-  };
+  /**
+   * Clears all items from the user's shopping cart
+   * Used after successful checkout completion to avoid duplicate orders
+   */
+  const ClearCart = useMutation({
+    mutationKey: ["clear_cart"],
+    mutationFn: async () => {
+      const res = await axios.delete(`${API_URL}/protected/clear_cart`, {
+        headers: {
+          Authorization: `Bearer ${session?.user?.token}`,
+        },
+        withCredentials: true,
+      });
+      return res.data;
+    },
+    onSuccess: () => {
+      toast.success("Cart has been cleared");
+      queryClient.invalidateQueries({ queryKey: ["get_cart"] });
+    },
+    onError: (error) => {
+      toast.error("Failed to clear cart");
+      console.error("Error clearing cart:", error);
+    },
+  });
 
   const GetCart = useQuery<CartData>({
     queryKey: ["get_cart"],

@@ -1,6 +1,6 @@
-import { NextResponse } from "next/server";
-import client from "@/libs/connect";
 import { auth } from "@/auth";
+import client from "@/libs/connect";
+import { NextResponse } from "next/server";
 
 // Endpoint to retrieve all users (admin only)
 export async function GET() {

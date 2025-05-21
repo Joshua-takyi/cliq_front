@@ -6,10 +6,9 @@ import { useState, useEffect } from "react";
 import CartCard from "./cartCart"; // Import the CartCard component
 import { UseCart } from "../hooks/useCart"; // Import the cart hook
 import { CartData } from "../types/product_types"; // Import product types
-import { useSession } from "next-auth/react";
-import { useCheckout } from "@/app/services/checkout";
 import Link from "next/link";
 import { formatPrice } from "@/lib/utils";
+import { useRouter } from "next/navigation";
 
 export const Cart = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -21,8 +20,7 @@ export const Cart = () => {
     }>
   >([]);
   // Track if on mobile screen
-
-  const session = useSession();
+  const router = useRouter();
   const { GetCart } = UseCart();
 
   const { data, isLoading } = GetCart;
@@ -180,23 +178,8 @@ export const Cart = () => {
     }
   };
 
-  // // Format price with currency
-  // const formatPrice = (price: number) => {
-  //   return new Intl.NumberFormat("en-US", {
-  //     style: "currency",
-  //     currency: "GHS", // Ghana Cedi (₵)
-  //     minimumFractionDigits: 2,
-  //   }).format(price);
-  // };
-  const { mutate } = useCheckout();
-  // Handle checkout process
   const handleCheckout = () => {
-    if (cartItems.length === 0) return;
-
-    mutate({
-      amount: data?.total_amount || 0,
-      email: session?.data?.user?.email || "",
-    });
+    router.push("/checkout");
   };
 
   if (isLoading) {
@@ -298,7 +281,7 @@ export const Cart = () => {
                 {cartItems.map((item, index) => (
                   <CartCard
                     cartDetails={item.cartDetails}
-                    key={`${item.cartDetails.items[0].product_Id}-${item.cartDetails.items[0].color}-${item.cartDetails.items[0].model}`}
+                    key={`${item.cartDetails.items[0].product_Id}-${item.cartDetails.items[0].color}-${item.cartDetails.items[0].model}-${index}`}
                     onUpdateQuantity={updateCartItemQuantity}
                   />
                 ))}

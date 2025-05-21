@@ -6,8 +6,9 @@ import { ObjectId } from "mongodb";
 // Endpoint to update a user's role (admin only)
 export async function PATCH(
   request: Request,
-  { params }: { params: { userId: string } }
+  context: { params: { userId: string } }
 ) {
+  const { params } = context;
   try {
     // Check if the current user is an admin
     const session = await auth();

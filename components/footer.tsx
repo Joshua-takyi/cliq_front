@@ -12,6 +12,38 @@ import {
 } from "lucide-react";
 
 export default function Footer() {
+  const footerCategories = [
+    {
+      id: 1,
+      title: "phone cases",
+      link: "/collections/phone-cases?category=phone-cases",
+    },
+    {
+      id: 2,
+      title: "Airpod cases",
+      link: "/collections/airpod-cases?category=airpod-cases",
+    },
+    {
+      id: 3,
+      title: "Headphones and Audio",
+      link: "/collections/headphones?category=headphones",
+    },
+    {
+      id: 4,
+      title: "Chargers",
+      link: "/collections/chargers?category=chargers",
+    },
+    {
+      id: 5,
+      title: "Watch Straps",
+      link: "/collections/watch-straps?category=watch-straps",
+    },
+    {
+      id: 6,
+      title: "Screen Protectors",
+      link: "/collections/screen-protectors?category=screen-protectors",
+    },
+  ];
   return (
     <footer className="bg-[#111111] text-white">
       {/* Newsletter Section */}
@@ -89,37 +121,16 @@ export default function Footer() {
           <div>
             <h2 className="text-xl font-bold mb-6 text-white">Categories</h2>
             <ul className="space-y-3">
-              <li>
-                <Link
-                  href="/collections/phone-cases"
-                  className="text-gray-300 hover:text-[#9BEC00] flex items-center"
-                >
-                  <ChevronRight size={16} className="mr-2" /> Phone Cases
-                </Link>
-              </li>
-              <li>
-                <Link
-                  href="/collections/airpod-cases"
-                  className="text-gray-300 hover:text-[#9BEC00] flex items-center"
-                >
-                  <ChevronRight size={16} className="mr-2" /> Airpod Cases
-                </Link>
-              </li>
-              <li>
-                <Link
-                  href="/collections/headphones"
-                  className="text-gray-300 hover:text-[#9BEC00] flex items-center"
-                >
-                  <ChevronRight size={16} className="mr-2" /> Headphones
-                </Link>
-              </li>
-              <li>
-                <Link
-                  href="/collections/chargers"
-                  className="text-gray-300 hover:text-[#9BEC00] flex items-center"
-                >
-                  <ChevronRight size={16} className="mr-2" /> Chargers
-                </Link>
+              <li className="flex flex-col gap-3">
+                {footerCategories.map((category) => (
+                  <Link
+                    key={category.id}
+                    href={category.link}
+                    className="text-gray-300 hover:text-[#9BEC00] flex items-center"
+                  >
+                    <ChevronRight size={16} className="mr-2" /> {category.title}
+                  </Link>
+                ))}
               </li>
               <li>
                 <Link

@@ -1,21 +1,49 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import Link from "next/link";
+import { SimpleShopBreadcrumb } from "@/components/ShopBreadcrumb";
 import { Button } from "@/components/ui/button";
-import Image from "next/image";
-import { formatPrice } from "@/lib/utils";
-import { toast } from "sonner";
 import { UseCart } from "@/hooks/useCart";
-// import { RecommendedProducts } from "./components/RecommendedProducts";
+import { formatPrice } from "@/lib/utils";
+import { useSession } from "next-auth/react";
+import Image from "next/image";
+import Link from "next/link";
+import { useEffect, useState } from "react";
+import { toast } from "sonner";
 
 export default function CartPage() {
   const { GetCart, RemoveFromCart, UpdateCart } = UseCart();
-  const [couponCode, setCouponCode] = useState("");
-  // Initialize the discount variable to 0 or fetch it dynamically if applicable
-  const discount = 0; // Replace with actual logic if discount is calculated dynamically
-
+  // const [couponCode, setCouponCode] = useState("");
+  const [isMobile, setIsMobile] = useState(false);
+  const session = useSession();
+  const discount = 0;
   const { data } = GetCart;
+
+  // TODO: Implement the logic to apply the coupon code
+  // type CouponEvent = React.MouseEvent<HTMLButtonElement>;
+  // const handleApplyCoupon = (e: CouponEvent) => {
+  //   e.preventDefault();
+  //   console.log("Applying coupon:", couponCode);
+  // };
+
+  useEffect(() => {
+    const handleResize = () => {
+      setIsMobile(window.innerWidth < 768);
+    };
+    window.addEventListener("resize", handleResize);
+    handleResize(); // Call on mount
+    return () => {
+      window.removeEventListener("resize", handleResize);
+    };
+  }, []);
+
+  const formatTitle = (title: string, maxLength: number = 25) => {
+    if (isMobile) {
+      return title.length > maxLength
+        ? `${title.slice(0, maxLength)}...`
+        : title;
+    }
+    return title;
+  };
 
   const cartTotal =
     data?.items.reduce((total, item) => total + item.total_price, 0) || 0;
@@ -27,13 +55,22 @@ export default function CartPage() {
     );
   }
 
-  // Define a type for the event parameter
+  const handleCheckout = () => {
+    // Validate cart has items
+    if (!data?.items || data.items.length === 0) {
+      toast.error("Your cart is empty. Please add items before checkout.");
+      return;
+    }
 
-  //   const handleApplyCoupon = (e) => {
-  //     e.preventDefault();
-  //     // Implement coupon application logic here
-  //     console.log("Applying coupon:", couponCode);
-  //   };
+    // Validate user is logged in
+    if (!session?.data?.user?.email) {
+      toast.error("Please sign in to proceed with checkout");
+      return;
+    }
+
+    // Navigate to checkout page instead of directly initiating payment
+    window.location.href = "/checkout";
+  };
 
   return (
     <main className="max-w-[100rem] mx-auto px-4 py-6 md:py-10">
@@ -42,15 +79,7 @@ export default function CartPage() {
           Shopping cart
         </h1>
         <div className="flex items-center text-xs md:text-sm text-gray-500">
-          <Link href="/" className="hover:underline">
-            Shopping cart
-          </Link>
-          <span className="mx-2">→</span>
-          <Link href="/checkout" className="hover:underline">
-            Checkout
-          </Link>
-          <span className="mx-2">→</span>
-          <span>Order complete</span>
+          <SimpleShopBreadcrumb />
         </div>
       </div>
 
@@ -78,13 +107,13 @@ export default function CartPage() {
               <div className="text-right">Subtotal</div>
             </div>
 
-            {data?.items.map((item) => (
+            {data?.items.map((item, index) => (
               <div
-                key={`${item.title}-${item.color || "default"}`}
+                key={`${item.title}-${item.color || "default"}-${index}`}
                 className="border-b pb-6 mb-6"
               >
-                <div className="grid grid-cols-4 items-center">
-                  <div className="col-span-2 flex items-center gap-4">
+                <div className="grid grid-cols-4 items-center  py-2">
+                  <div className="col-span-2 flex items-center gap-2 sm:gap-4">
                     <button
                       onClick={() => RemoveFromCart.mutate({ id: item.id })}
                       className="text-gray-400 hover:text-gray-600"
@@ -93,7 +122,9 @@ export default function CartPage() {
                       ×
                     </button>
 
-                    <div className="w-20 h-20 relative flex-shrink-0">
+                    <div
+                      className={`w-16 h-16 sm:w-20 sm:h-20 relative flex-shrink-0`}
+                    >
                       {item.image && (
                         <Image
                           src={item.image}
@@ -105,7 +136,13 @@ export default function CartPage() {
                     </div>
 
                     <div>
-                      <h3 className="font-medium">{item.title}</h3>
+                      <h3
+                        className={`font-medium ${
+                          isMobile ? "text-sm line-clamp-2" : ""
+                        }`}
+                      >
+                        {formatTitle(item.title)}
+                      </h3>
                       {item.color && (
                         <div className="text-sm text-gray-500 flex items-center">
                           <span>Color:</span>
@@ -125,9 +162,7 @@ export default function CartPage() {
                         onClick={() =>
                           UpdateCart.mutate({
                             action: "decrement",
-                            product_Id: item.product_Id, // Changed back to match the CartData interface
-                            color: item.color,
-                            quantity: item.quantity,
+                            cart_item_id: item.id,
                           })
                         }
                         className="px-3 py-1 border-r hover:bg-gray-100"
@@ -139,9 +174,7 @@ export default function CartPage() {
                         onClick={() =>
                           UpdateCart.mutate({
                             action: "increment",
-                            product_Id: item.product_Id,
-                            color: item.color,
-                            quantity: item.quantity,
+                            cart_item_id: item.id,
                           })
                         }
                         className="px-3 py-1 border-l hover:bg-gray-100"
@@ -158,7 +191,7 @@ export default function CartPage() {
               </div>
             ))}
 
-            <div className="flex justify-between items-center pt-4">
+            {/* <div className="flex justify-between items-center pt-4">
               <div className="flex gap-2">
                 <input
                   type="text"
@@ -170,16 +203,16 @@ export default function CartPage() {
                 <Button
                   className="bg-black rounded-none cursor-pointer text-white hover:bg-gray-800"
                   variant="default"
-                  //   onClick={handleApplyCoupon}
+                  onClick={handleApplyCoupon}
                 >
                   Apply Coupon
                 </Button>
               </div>
-            </div>
+            </div> */}
           </div>
 
           {/* Order Summary */}
-          <div className="lg:col-span-1">
+          <div className="lg:col-span-1 border ">
             <div className="border p-6">
               <h2 className="text-xl font-semibold mb-4">Cart Totals</h2>
 
@@ -221,11 +254,12 @@ export default function CartPage() {
                 </div>
               </div>
 
-              <Link href="/checkout">
-                <Button className="w-full bg-black rounded-none h-12 cursor-pointer text-white hover:bg-gray-800 p-3">
-                  Proceed To Checkout
-                </Button>
-              </Link>
+              <Button
+                onClick={handleCheckout}
+                className="w-full bg-black rounded-none h-12 cursor-pointer text-white hover:bg-gray-800 p-3"
+              >
+                Proceed To Checkout
+              </Button>
             </div>
           </div>
         </div>

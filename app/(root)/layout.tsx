@@ -12,7 +12,7 @@ export default function RootLayout({
       <Nav />
 
       {/* main flex‑grows to fill leftover space */}
-      <main className="flex-grow">{children}</main>
+      <main className="flex-grow pb-20">{children}</main>
 
       <Footer />
     </div>

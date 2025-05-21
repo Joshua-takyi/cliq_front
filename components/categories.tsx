@@ -1,12 +1,10 @@
 "use client";
-import { CategoryCard } from "./categoryCard";
-import { motion, AnimatePresence } from "framer-motion";
-import { useState, useRef, useEffect, CSSProperties } from "react";
-import Slider from "react-slick";
-import "slick-carousel/slick/slick.css";
-import "slick-carousel/slick/slick-theme.css";
-import React from "react"; // Added for React.CSSProperties
 import { ChevronLeft, ChevronRight } from "lucide-react"; // Import chevron icons for better visibility
+import React, { CSSProperties, useEffect, useRef, useState } from "react"; // Added for React.CSSProperties
+import Slider from "react-slick";
+import "slick-carousel/slick/slick-theme.css";
+import "slick-carousel/slick/slick.css";
+import { CategoryCard } from "./categoryCard";
 
 const customStyles = `
   /* Connected border styling for carousel items */
@@ -212,7 +210,7 @@ const categories = [
     id: "2",
     title: "Airpod Cases",
     image: "/images/MWK43.png",
-    href: "/collections/airpod-cases?category=airpod-case",
+    href: "/collections/airpod-cases?category=airpod-cases",
   },
   {
     id: "3",
