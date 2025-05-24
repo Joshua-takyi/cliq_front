@@ -58,46 +58,25 @@ export interface CartData {
  * Checkout form data for customer delivery information
  */
 export interface CheckoutFormData {
-  firstName: string;
-  lastName?: string;
-  phoneNumber: string;
+  id: string;
+  user_id: string;
+  name: string;
+  phone: string;
   email: string;
   region: string;
-  streetAddress?: string;
-  country: string;
-  shipToAnotherAddress?: boolean;
-  shippingAddress?: {
-    firstName: string;
-    lastName?: string;
-    phoneNumber: string;
-    region: string;
-    streetAddress: string;
-    country: string;
-  };
-  orderNotes?: string;
-  couponCode?: string;
+  street?: string;
+  ghana_post?: string;
+  deliver_to?: string;
+  city?: string;
 }
 
 /**
  * Checkout request parameters for initiating a payment
  */
-export interface CheckoutRequest {
-  amount: number;
-  email: string;
-  callback_url?: string;
-  deliveryDetails?: CheckoutFormData;
-}
 
 /**
  * Checkout response from the payment gateway
  */
-export interface CheckoutResponse {
-  status: string;
-  message: string;
-  reference: string;
-  authorization_url: string;
-  access_code?: string;
-}
 
 /**
  * Payment verification response from the payment gateway

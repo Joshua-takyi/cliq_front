@@ -1,24 +1,16 @@
 "use client";
 
-import { useParams, useRouter } from "next/navigation";
-import { ArrowLeft } from "lucide-react";
-import Link from "next/link";
 import ProductForm from "@/components/form";
 import { useProduct } from "@/hooks/useProduct";
+import { ArrowLeft } from "lucide-react";
+import Link from "next/link";
+import { useParams } from "next/navigation";
 // import { useEffect } from "react";
-import { useQueryClient } from "@tanstack/react-query";
 
 function EditProductContainer() {
   const { id } = useParams();
   const productId = id as string; // Ensure productId is a string
   const { getProductById } = useProduct();
-  const queryClient = useQueryClient();
-
-  // // Prefetch the product data
-  // useEffect(() => {
-  //   // Prefetch and invalidate the product data to ensure we have the latest version
-  //   queryClient.invalidateQueries({ queryKey: ["product", productId] });
-  // }, [productId, queryClient]);
 
   const { data: product, isLoading, isError } = getProductById(productId);
 
@@ -26,7 +18,6 @@ function EditProductContainer() {
     return (
       <div className="py-16 text-center">
         <p className="text-gray-500">Loading product data...</p>
-        {/* Add a more attractive loading indicator here if desired */}
       </div>
     );
   }

@@ -163,7 +163,7 @@ export const Nav = () => {
   return (
     <motion.div
       ref={navRef}
-      className="border-b border-black/40 top-0 z-50 sticky bg-customBackground"
+      className="border border-black/40 top-0 z-50 sticky bg-customBackground"
       variants={navVariants}
       initial="visible"
     >
@@ -240,7 +240,7 @@ export const Nav = () => {
                 className="hidden md:block"
               >
                 <Link
-                  href="/profile"
+                  href="/profile/address"
                   className="md:p-1 lg:p-2 font-medium md:text-sm lg:text-base"
                 >
                   Profile

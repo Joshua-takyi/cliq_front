@@ -1,67 +1,64 @@
 "use client";
 
+import { GHANA_REGIONS } from "@/-database/db";
 import { useCheckout } from "@/app/services/checkout";
 import CheckoutFormInput from "@/components/CheckoutFormInput";
 import ResponsiveLazyImage from "@/components/lazyImage";
 import { SimpleShopBreadcrumb } from "@/components/ShopBreadcrumb";
 import { Button } from "@/components/ui/button";
 import { UseCart } from "@/hooks/useCart";
+import { useProfile } from "@/hooks/useProfile";
 import { formatPrice } from "@/lib/utils";
-import { CheckoutFormData, CheckoutRequest } from "@/types/product_types";
+import { CheckoutFormData } from "@/types/product_types";
 import { useSession } from "next-auth/react";
 import Image from "next/image";
 import { FormEvent, useEffect, useState } from "react";
 import { toast } from "sonner";
 
-// List of Ghana regions for dropdown selection
-const GHANA_REGIONS = [
-  { value: "Greater Accra", label: "Greater Accra" },
-  { value: "Ashanti", label: "Ashanti" },
-  { value: "Central", label: "Central" },
-  { value: "Eastern", label: "Eastern" },
-  { value: "Western", label: "Western" },
-  { value: "Northern", label: "Northern" },
-  { value: "Volta", label: "Volta" },
-  { value: "Brong Ahafo", label: "Brong Ahafo" },
-  { value: "Upper East", label: "Upper East" },
-  { value: "Upper West", label: "Upper West" },
-];
-
-/**
- * Checkout page component for collecting delivery information and processing payment
- * Displays customer's cart information alongside a delivery details form
- */
 export default function CheckoutPage() {
   const { GetCart } = UseCart();
   const { data: cartData, isLoading } = GetCart;
   const session = useSession();
-  //   const [couponCode, setCouponCode] = useState("");
   const { mutate, isPending } = useCheckout();
   const [formErrors, setFormErrors] = useState<Record<string, string>>({});
 
-  // Define form state for checkout
+  const { getUserInfo } = useProfile();
+  const { data: userData, refetch } = getUserInfo;
+
   const [formData, setFormData] = useState<CheckoutFormData>({
-    firstName: "",
-    lastName: "",
-    phoneNumber: "",
-    email: session.data?.user?.email || "",
+    id: "",
+    user_id: "",
+    name: "",
+    phone: "",
+    email: "",
     region: "",
-    streetAddress: "",
-    country: "Ghana", // Default country
-    shipToAnotherAddress: false,
-    orderNotes: "",
+    street: "",
+    ghana_post: "",
+    city: "",
   });
 
-  // Update email field when session changes
+  // Update form with user profile data when it loads
+  // This useEffect will run when userData or session data changes
   useEffect(() => {
-    if (session.data?.user?.email) {
-      setFormData((prev) => ({
-        ...prev,
-        email: session.data.user.email || "",
-      }));
+    if (userData || session.data?.user) {
+      setFormData({
+        id: userData?.id || "",
+        user_id: session.data?.user?.id || "",
+        name: userData?.name || "",
+        phone: userData?.phone || "",
+        email: session.data?.user?.email || "",
+        region: userData?.region || "",
+        street: userData?.street || "",
+        ghana_post: userData?.ghana_post || "",
+        city: userData?.city || "",
+      });
     }
-  }, [session.data?.user?.email]);
+  }, [userData, session.data?.user]);
 
+  useEffect(() => {
+    // refetch the user data when the component mounts
+    refetch();
+  });
   // Handle form input changes
   const handleInputChange = (
     e: React.ChangeEvent<
@@ -69,98 +66,46 @@ export default function CheckoutPage() {
     >
   ) => {
     const { name, value } = e.target;
-
-    // Handle nested shipping address fields
-    if (name.startsWith("shipping.")) {
-      const field = name.split(".")[1];
-      setFormData((prev) => ({
-        ...prev,
-        shippingAddress: {
-          ...prev.shippingAddress!,
-          [field]: value,
-        },
-      }));
-
-      // Clear any error for this field
-      if (formErrors[`shipping.${field}`]) {
-        setFormErrors((prev) => {
-          const updated = { ...prev };
-          delete updated[`shipping.${field}`];
-          return updated;
-        });
-      }
-    } else {
-      setFormData((prev) => ({
-        ...prev,
-        [name]: value,
-      }));
-
-      // Clear any error for this field
-      if (formErrors[name]) {
-        setFormErrors((prev) => {
-          const updated = { ...prev };
-          delete updated[name];
-          return updated;
-        });
-      }
-    }
-  };
-
-  // Handle checkbox changes
-  const handleCheckboxChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, checked } = e.target;
     setFormData((prev) => ({
       ...prev,
-      [name]: checked,
+      [name]: value,
     }));
   };
 
-  // Validate form data
+  // Validate form data with detailed error messages
   const validateForm = (): boolean => {
     const errors: Record<string, string> = {};
 
-    // Required fields validation
-    if (!formData.firstName.trim()) {
-      errors.firstName = "First name is required";
+    // Name validation - required field with meaningful error message
+    if (!formData.name.trim()) {
+      errors.name = "Full name is required for delivery information";
     }
 
-    if (!formData.phoneNumber.trim()) {
-      errors.phoneNumber = "Phone number is required";
-    } else if (!/^\+?[0-9]{10,15}$/.test(formData.phoneNumber.trim())) {
-      errors.phoneNumber = "Please enter a valid phone number";
+    // Phone validation - format and required with detailed error message
+    if (!formData.phone.trim()) {
+      errors.phone = "Phone number is required for delivery coordination";
+    } else if (!/^\+?[0-9]{10,15}$/.test(formData.phone.trim())) {
+      errors.phone =
+        "Please enter a valid phone number with 10-15 digits (e.g., +233XXXXXXXXX)";
     }
 
+    // Email validation - format and required with helpful error message
     if (!formData.email.trim()) {
-      errors.email = "Email address is required";
+      errors.email = "Email address is required for order confirmation";
     } else if (!/^\S+@\S+\.\S+$/.test(formData.email.trim())) {
-      errors.email = "Please enter a valid email address";
+      errors.email =
+        "Please enter a valid email address (e.g., name@example.com)";
     }
 
+    // Region validation - required selection with context for why it's needed
     if (!formData.region) {
-      errors.region = "Please select a region";
+      errors.region =
+        "Please select your region for accurate delivery information";
     }
 
-    // Validate shipping address fields if shipping to a different address
-    if (formData.shipToAnotherAddress) {
-      if (!formData.shippingAddress?.firstName?.trim()) {
-        errors["shipping.firstName"] = "First name is required";
-      }
-
-      if (!formData.shippingAddress?.phoneNumber?.trim()) {
-        errors["shipping.phoneNumber"] = "Phone number is required";
-      } else if (
-        !/^\+?[0-9]{10,15}$/.test(formData.shippingAddress.phoneNumber.trim())
-      ) {
-        errors["shipping.phoneNumber"] = "Please enter a valid phone number";
-      }
-
-      if (!formData.shippingAddress?.region) {
-        errors["shipping.region"] = "Please select a region";
-      }
-
-      if (!formData.shippingAddress?.streetAddress?.trim()) {
-        errors["shipping.streetAddress"] = "Street address is required";
-      }
+    // Street address validation if provided
+    if (formData.street?.trim() === "") {
+      errors.street = "Please provide your street address for delivery";
     }
 
     setFormErrors(errors);
@@ -173,13 +118,13 @@ export default function CheckoutPage() {
 
     // Form validation
     if (!validateForm()) {
-      toast.error("Please correct the errors in the form");
+      toast.error("Please correct the errors in the form before proceeding");
       return;
     }
 
     // Validate user is logged in
     if (!session?.data?.user?.email) {
-      toast.error("Please sign in to proceed with checkout");
+      toast.error("Please sign in to your account to proceed with checkout");
       return;
     }
 
@@ -193,16 +138,32 @@ export default function CheckoutPage() {
     const cartTotal =
       cartData?.items.reduce((total, item) => total + item.total_price, 0) || 0;
 
-    // Prepare checkout request
-    const checkoutRequest: CheckoutRequest = {
-      amount: cartData?.total_amount || cartTotal,
+    // Enhanced payload with shipping details to ensure proper order fulfillment
+    const payload = {
+      amount: cartTotal,
       email: session.data.user.email,
-      deliveryDetails: formData,
+      shippingInfo: {
+        name: formData.name,
+        phone: formData.phone,
+        email: formData.email,
+        region: formData.region,
+        street: formData.street || "",
+        ghana_post: formData.ghana_post || "",
+        city: formData.city || "",
+        notes: (formData as any).orderNotes || "",
+      },
+      cartItems: cartData.items.map((item) => ({
+        id: item.id,
+        title: item.title,
+        quantity: item.quantity,
+        price: item.total_price,
+        color: item.color,
+      })),
     };
 
     // Process checkout with loading toast feedback
     toast.loading("Processing your payment...");
-    mutate(checkoutRequest, {
+    mutate(payload, {
       onSuccess: () => {
         toast.dismiss();
         toast.success("Payment initiated successfully!");
@@ -214,26 +175,6 @@ export default function CheckoutPage() {
     });
   };
 
-  // Handle applying coupon code
-  //   const handleApplyCoupon = (e: React.MouseEvent<HTMLButtonElement>) => {
-  //     e.preventDefault();
-
-  //     if (!couponCode) {
-  //       toast.error("Please enter a coupon code");
-  //       return;
-  //     }
-
-  //     // Set coupon code in form data
-  //     setFormData((prev) => ({
-  //       ...prev,
-  //       couponCode,
-  //     }));
-
-  // TODO: Implement coupon validation with backend
-  //     toast.info("Coupon code applied! (Feature in development)");
-  //   };
-
-  // Show loading state while cart data is being fetched
   if (isLoading) {
     return (
       <div className="flex items-center justify-center h-[400px]">
@@ -256,40 +197,11 @@ export default function CheckoutPage() {
         <SimpleShopBreadcrumb />
       </div>
 
-      {/* Coupon code section */}
-      {/* <div className="mb-8 bg-transparent p-4 rounded-none border border-gray-200">
-        <div className="flex items-center">
-          <span className="mr-2 text-sm">Have a coupon?</span>
-          <button
-            onClick={() => document.getElementById("coupon-input")?.focus()}
-            className="text-sm text-blue-600 hover:underline"
-          >
-            Click here to enter your code
-          </button>
-        </div>
-        <div className="mt-2 flex">
-          <input
-            id="coupon-input"
-            type="text"
-            value={couponCode}
-            onChange={(e) => setCouponCode(e.target.value)}
-            placeholder="Coupon code"
-            className="flex-grow border border-gray-300 rounded-none p-2 text-sm focus:outline-none focus:ring-1 focus:ring-blue-500"
-          />
-          <button
-            onClick={handleApplyCoupon}
-            className="bg-gray-800 hover:bg-black text-white px-4 rounded-none text-sm"
-          >
-            Apply
-          </button>
-        </div>
-      </div> */}
-
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
         {/* Billing details form */}
         <form
           onSubmit={handleSubmit}
-          className="lg:col-span-1 border border-black/50"
+          className="lg:col-span-1 border border-black/50 h-fit"
         >
           <div className="bg-transparent p-6 rounded-none border border-gray-200">
             <h2 className="text-xl font-semibold mb-6">Billing Details</h2>
@@ -297,34 +209,24 @@ export default function CheckoutPage() {
             {/* Name fields */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
               <CheckoutFormInput
-                label="First name"
-                name="firstName"
-                value={formData.firstName}
+                label="name"
+                name="name"
+                value={formData.name}
                 onChange={handleInputChange}
                 required
-                error={formErrors.firstName}
+                error={formErrors.name}
               />
               <CheckoutFormInput
-                label="Last name"
-                name="lastName"
-                value={formData.lastName || ""}
+                label="Phone"
+                name="phone"
+                type="tel"
+                value={formData.phone}
                 onChange={handleInputChange}
-                placeholder="Optional"
+                required
+                error={formErrors.phone}
               />
             </div>
 
-            {/* Phone field */}
-            <CheckoutFormInput
-              label="Phone"
-              name="phoneNumber"
-              type="tel"
-              value={formData.phoneNumber}
-              onChange={handleInputChange}
-              required
-              error={formErrors.phoneNumber}
-            />
-
-            {/* Email field */}
             <CheckoutFormInput
               label="Email address"
               name="email"
@@ -350,139 +252,23 @@ export default function CheckoutPage() {
             {/* Street address field */}
             <CheckoutFormInput
               label="Street address"
-              name="streetAddress"
-              value={formData.streetAddress || ""}
+              name="street"
+              value={formData.street || ""}
               onChange={handleInputChange}
               placeholder="House number and street name"
             />
 
-            {/* Country/Region field */}
-            <div className="mb-6">
-              <label
-                htmlFor="country"
-                className="block text-sm font-medium text-gray-700 mb-1"
-              >
-                Country / Region <span className="text-red-500">*</span>
-              </label>
-              <select
-                id="country"
-                name="country"
-                required
-                value={formData.country}
-                onChange={handleInputChange}
-                className="w-full border border-gray-300 rounded-none p-2 text-sm focus:outline-none focus:ring-1 focus:ring-blue-500"
-                disabled // Disabled since Ghana is currently the only option
-              >
-                <option value="Ghana">Ghana</option>
-              </select>
-            </div>
-
-            {/* Shipping address checkbox */}
-            <div className="mb-6">
-              <div className="flex items-center">
-                <input
-                  id="shipToAnotherAddress"
-                  name="shipToAnotherAddress"
-                  type="checkbox"
-                  checked={formData.shipToAnotherAddress}
-                  onChange={handleCheckboxChange}
-                  className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
-                />
-                <label
-                  htmlFor="shipToAnotherAddress"
-                  className="ml-2 block text-sm text-gray-700"
-                >
-                  Ship to a different address?
-                </label>
-              </div>
-            </div>
-
-            {/* Shipping address fields (conditionally rendered) */}
-            {formData.shipToAnotherAddress && (
-              <div className="border-t border-gray-200 pt-4 mb-6">
-                <h3 className="text-lg font-medium mb-4">Shipping Address</h3>
-
-                {/* Shipping name fields */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-                  <CheckoutFormInput
-                    label="First name"
-                    name="shipping.firstName"
-                    value={formData.shippingAddress?.firstName || ""}
-                    onChange={handleInputChange}
-                    required
-                    error={formErrors["shipping.firstName"]}
-                  />
-                  <CheckoutFormInput
-                    label="Last name"
-                    name="shipping.lastName"
-                    value={formData.shippingAddress?.lastName || ""}
-                    onChange={handleInputChange}
-                    placeholder="Optional"
-                  />
-                </div>
-
-                {/* Shipping phone field */}
-                <CheckoutFormInput
-                  label="Phone"
-                  name="shipping.phoneNumber"
-                  type="tel"
-                  value={formData.shippingAddress?.phoneNumber || ""}
-                  onChange={handleInputChange}
-                  required
-                  error={formErrors["shipping.phoneNumber"]}
-                />
-
-                {/* Shipping region field */}
-                <CheckoutFormInput
-                  label="Region"
-                  name="shipping.region"
-                  as="select"
-                  value={formData.shippingAddress?.region || ""}
-                  onChange={handleInputChange}
-                  options={GHANA_REGIONS}
-                  required
-                  error={formErrors["shipping.region"]}
-                />
-
-                {/* Shipping street address field */}
-                <CheckoutFormInput
-                  label="Street address"
-                  name="shipping.streetAddress"
-                  value={formData.shippingAddress?.streetAddress || ""}
-                  onChange={handleInputChange}
-                  placeholder="House number and street name"
-                  required
-                  error={formErrors["shipping.streetAddress"]}
-                />
-
-                {/* Shipping country field */}
-                <div className="mb-4">
-                  <label
-                    htmlFor="shipping.country"
-                    className="block text-sm font-medium text-gray-700 mb-1"
-                  >
-                    Country / Region <span className="text-red-500">*</span>
-                  </label>
-                  <select
-                    id="shipping.country"
-                    name="shipping.country"
-                    required
-                    value={formData.shippingAddress?.country || "Ghana"}
-                    onChange={handleInputChange}
-                    className="w-full border border-gray-300 rounded-none p-2 text-sm focus:outline-none focus:ring-1 focus:ring-blue-500"
-                    disabled // Disabled since Ghana is currently the only option
-                  >
-                    <option value="Ghana">Ghana</option>
-                  </select>
-                </div>
-              </div>
-            )}
-
-            {/* Order notes field */}
+            <CheckoutFormInput
+              label="Ghana Post GPS"
+              name="ghana_post"
+              value={formData.ghana_post || ""}
+              onChange={handleInputChange}
+              placeholder="Enter your Ghana Post GPS address  "
+            />
             <CheckoutFormInput
               label="Order notes"
               name="orderNotes"
-              value={formData.orderNotes || ""}
+              value={(formData as any).orderNotes || ""}
               onChange={handleInputChange}
               placeholder="Notes about your order, e.g. special notes for delivery."
               as="textarea"

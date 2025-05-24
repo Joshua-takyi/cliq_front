@@ -136,6 +136,9 @@ export const UseCart = () => {
       }
       return res.data;
     },
+    networkMode: "always",
+    refetchOnWindowFocus: true,
+    refetchOnMount: true,
   });
   return {
     AddToCart,

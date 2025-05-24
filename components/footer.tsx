@@ -239,7 +239,7 @@ export default function Footer() {
             <p className="text-gray-400 mb-4 md:mb-0">
               © {new Date().getFullYear()} Shop. All rights reserved.
             </p>
-            <div className="flex space-x-4">
+            {/* <div className="flex space-x-4">
               <img src="/images/payment-visa.png" alt="Visa" className="h-8" />
               <img
                 src="/images/payment-mastercard.png"
@@ -256,7 +256,7 @@ export default function Footer() {
                 alt="Apple Pay"
                 className="h-8"
               />
-            </div>
+            </div> */}
           </div>
         </div>
       </div>

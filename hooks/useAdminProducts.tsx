@@ -1,5 +1,5 @@
 import { ProductProps } from "@/types/product_types";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import axios from "axios";
 
 interface ProductData {

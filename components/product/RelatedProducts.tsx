@@ -26,8 +26,8 @@ const RelatedProducts = ({ productId }: { productId: string }) => {
     queryKey: ["get_similar_products", productId],
     queryFn: async () => {
       const res = await axios.post(`${API_URL}/get_similar_products`, reqBody);
-
-      console.log("datas form axios", res.data);
+      // debugging to check the response
+      // console.log("datas form axios", res.data);
       return res.data;
     },
   });

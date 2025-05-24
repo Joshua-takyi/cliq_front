@@ -2,145 +2,90 @@
 
 import { useMutation } from "@tanstack/react-query";
 import axios from "axios";
-import { useSession } from "next-auth/react";
 import { toast } from "sonner";
-import { CheckoutRequest, CheckoutResponse } from "@/types/product_types";
+
+// Enhanced interface to include shipping details for complete order processing
+interface CheckoutPayload {
+  amount: number;
+  email: string;
+  shippingInfo?: {
+    name: string;
+    phone: string;
+    email?: string;
+    region: string;
+    street: string;
+    ghana_post?: string;
+    city?: string;
+    notes?: string;
+  };
+}
 
 export const useCheckout = () => {
   const API_URL =
     process.env.NODE_ENV === "development"
-      ? process.env.NEXT_PUBLIC_DEVELOPMENT_BACKEND_URL
-      : process.env.NEXT_PUBLIC_PRODUCTION_BACKEND_URL;
+      ? process.env.NEXT_PUBLIC_DEVELOPMENT || "/api"
+      : process.env.NEXT_PUBLIC_PRODUCTION || "/api";
 
-  // We use window.location.href for redirects instead of router
-  const { data: session } = useSession();
-
-  // Return the mutation with improved error handling and loading states
-  return useMutation<CheckoutResponse, Error, CheckoutRequest>({
-    mutationKey: ["checkout"],
-    mutationFn: async (data: CheckoutRequest) => {
-      if (!session || !session.user) {
-        throw new Error(
-          "Authentication required. Please sign in to proceed with checkout."
-        );
+  return useMutation({
+    mutationFn: async (payload: CheckoutPayload) => {
+      if (!payload.amount || payload.amount <= 0) {
+        throw new Error("Invalid payment amount: must be greater than zero");
       }
 
-      // Validate payment amount
-      if (!data.amount || data.amount <= 0) {
-        throw new Error(
-          "Invalid payment amount. Please ensure your cart has items with valid prices."
-        );
+      if (!payload.email) {
+        throw new Error("Invalid payment data: email is required");
       }
 
-      // Validate delivery details if provided
-      if (data.deliveryDetails) {
-        const { firstName, phoneNumber, email, region } = data.deliveryDetails;
-        if (!firstName || !phoneNumber || !email || !region) {
-          throw new Error(
-            "Missing required delivery information. Please complete all required fields."
-          );
+      console.log("Initiating payment with data:", payload);
+
+      const response = await axios.post(
+        `${API_URL}/payment/checkout`,
+        payload,
+        {
+          headers: {
+            "Content-Type": "application/json",
+          },
+          withCredentials: true,
         }
-      }
+      );
 
-      // Get the origin for constructing absolute URLs
-      const origin =
-        typeof window !== "undefined" ? window.location.origin : "";
-
-      // Create complete request with callback URL to payment-complete page
-      const requestData = {
-        ...data,
-        callback_url: `${origin}/payment-complete`, // Add callback URL to return to payment-complete page
-      };
-
-      // Store delivery details in localStorage for retrieval after payment
-      if (data.deliveryDetails) {
-        localStorage.setItem(
-          "deliveryDetails",
-          JSON.stringify(data.deliveryDetails)
-        );
-        // Set timestamp to detect stale delivery details
-        localStorage.setItem("deliveryDetailsTimestamp", Date.now().toString());
-      }
-
-      try {
-        const res = await axios.post(
-          `${API_URL}/protected/checkout`,
-          requestData,
-          {
-            headers: {
-              "Content-Type": "application/json",
-              Authorization: `Bearer ${session?.user?.token}`,
-            },
-            withCredentials: true,
-          }
-        );
-
-        // Validate response data
-        if (!res.data) {
-          throw new Error("No data returned from checkout API");
-        }
-
-        // Log success for debugging
-        console.log("Checkout response:", res.data);
-
-        return res.data;
-      } catch (error) {
-        // Enhanced error handling with more details
-        if (axios.isAxiosError(error)) {
-          const statusCode = error.response?.status;
-          const errorMessage = error.response?.data?.message || error.message;
-
-          // Handle specific error codes
-          if (statusCode === 401) {
-            throw new Error("Authentication failed. Please sign in again.");
-          } else if (statusCode === 400) {
-            throw new Error(`Invalid request: ${errorMessage}`);
-          } else if (statusCode === 500) {
-            throw new Error("Server error. Please try again later.");
-          }
-        }
-
-        // Generic error handling
-        throw new Error(
-          `Error during checkout: ${
-            error instanceof Error ? error.message : String(error)
-          }`
-        );
-      }
+      console.log("Payment API response:", response.data);
+      return response.data;
     },
-
-    onSuccess: (data) => {
-      console.log("Checkout successful:", data);
-      if (data?.authorization_url) {
-        // Store payment reference in localStorage for verification later
-        if (data?.reference) {
-          localStorage.setItem("paymentReference", data.reference);
-
-          // Also store timestamp to detect stale references
-          localStorage.setItem("paymentTimestamp", Date.now().toString());
-        }
-
-        localStorage.setItem(
-          "paymentReturnUrl",
-          window.location.origin + "/payment-complete"
+    onSuccess: (responseData) => {
+      if (responseData?.data?.authorization_url) {
+        toast.success("Payment initialized successfully");
+        console.log("Redirecting to:", responseData.data.authorization_url);
+        window.location.href = responseData.data.authorization_url;
+      }
+      // Handle Paystack nested response format
+      else if (responseData?.data?.data?.authorization_url) {
+        toast.success("Payment initialized successfully");
+        console.log(
+          "Redirecting to:",
+          responseData.data.data.authorization_url
         );
-
-        toast?.success?.("Redirecting to payment gateway...");
-
-        console.info("Redirecting to payment gateway:", data.authorization_url);
-
-        setTimeout(() => {
-          window.location.href = data.authorization_url;
-        }, 1500);
+        window.location.href = responseData.data.data.authorization_url;
+        // localStorage.setItem("reference", responseData.data.data.reference);
       } else {
-        console.error("Missing authorization URL in response");
-        toast?.error?.("Checkout failed: Invalid payment gateway response");
+        toast.error(
+          responseData?.message ||
+            responseData?.data?.message ||
+            "Failed to get authorization URL from payment provider"
+        );
+        console.error(
+          "Payment response missing authorization URL:",
+          responseData
+        );
       }
     },
-
     onError: (error) => {
-      console.error("Checkout error:", error.message);
-      toast?.error?.(error.message || "Checkout failed. Please try again.");
+      const errorMessage =
+        error instanceof Error
+          ? error.message
+          : "An error occurred while connecting to the payment service";
+      toast.error(errorMessage);
+      console.error("Payment initialization failed:", error);
     },
   });
 };

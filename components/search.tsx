@@ -1,6 +1,6 @@
 import { Search as SearchIcon } from "lucide-react";
 import { motion } from "framer-motion";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 
 export const Search = () => {
@@ -8,13 +8,22 @@ export const Search = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [isMobile, setIsMobile] = useState(false);
   const router = useRouter();
+  const searchInputRef = useRef<HTMLInputElement>(null);
 
   // Toggle search panel visibility
   const toggleSearch = () => {
-    // Toggle the search panel state
     setIsOpen(!isOpen);
-    // The body overflow is handled by the isOpen effect
   };
+
+  // Focus the search input when the panel opens
+  useEffect(() => {
+    if (isOpen && searchInputRef.current) {
+      // Short timeout to ensure the DOM has updated and the element is visible
+      setTimeout(() => {
+        searchInputRef.current?.focus();
+      }, 50);
+    }
+  }, [isOpen]);
 
   useEffect(() => {
     // Check if the window width is less than 768px
@@ -36,16 +45,28 @@ export const Search = () => {
 
   // Effect to manage body scroll locking based on search panel state
   useEffect(() => {
-    // This effect handles changes to the isOpen state
     if (isOpen) {
-      document.body.style.overflow = "hidden"; // Prevent scrolling when open
+      // Save the current scroll position before locking
+      const scrollY = window.scrollY;
+      document.body.style.position = "fixed";
+      document.body.style.top = `-${scrollY}px`;
+      document.body.style.width = "100%";
     } else {
-      document.body.style.overflow = ""; // Allow scrolling when closed
+      // Restore scroll position when closing
+      const scrollY = document.body.style.top;
+      document.body.style.position = "";
+      document.body.style.top = "";
+      document.body.style.width = "";
+      if (scrollY) {
+        window.scrollTo(0, parseInt(scrollY || "0") * -1);
+      }
     }
 
-    // Cleanup function to ensure scrolling is always restored
     return () => {
-      document.body.style.overflow = "";
+      // Cleanup function to ensure scrolling is always restored
+      document.body.style.position = "";
+      document.body.style.top = "";
+      document.body.style.width = "";
     };
   }, [isOpen]);
 
@@ -69,7 +90,6 @@ export const Search = () => {
     const handleEscKey = (e: KeyboardEvent) => {
       if (e.key === "Escape" && isOpen) {
         setIsOpen(false);
-        document.body.style.overflow = ""; // Restore scrolling when closing with ESC key
       }
     };
 
@@ -79,8 +99,6 @@ export const Search = () => {
     // Clean up event listener when component unmounts
     return () => {
       window.removeEventListener("keydown", handleEscKey);
-      // Ensure scrolling is restored if component unmounts while search is open
-      document.body.style.overflow = "";
     };
   }, [isOpen]);
 
@@ -97,95 +115,91 @@ export const Search = () => {
         <span className="hidden md:inline">Search</span>
       </div>
 
-      {/* Search panel that appears from the bottom with animation */}
+      {/* Search overlay that covers the entire viewport */}
+      {isOpen && (
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          transition={{ duration: 0.2 }}
+          className="fixed inset-0 bg-black bg-opacity-50 z-40"
+          onClick={() => setIsOpen(false)}
+        ></motion.div>
+      )}
+
+      {/* Search panel that slides up from the bottom */}
       <motion.div
-        initial={{ opacity: 0, y: "100%" }} // Start fully below the viewport
+        initial={{ opacity: 0, y: "100%" }}
         animate={{
           opacity: isOpen ? 1 : 0,
-          y: isOpen ? "0%" : "100%", // Move to visible position when open
+          y: isOpen ? "0%" : "100%",
         }}
         transition={{
-          duration: 0.6,
-          ease: [0.22, 1, 0.36, 1], // Custom cubic-bezier for smoother, more natural animation
+          duration: 0.5,
+          ease: [0.22, 1, 0.36, 1],
         }}
+        className="fixed inset-0 z-50 bg-customBackground"
         style={{
-          position: "fixed",
-          top: "70px", // Fixed top position
-          left: 0,
-          right: 0,
-          bottom: 0, // Ensures it extends to the bottom of the screen
-          zIndex: 40,
-          overflowY: "auto", // Allow scrolling within the search panel itself
-          height: "100%", // Full height
-          maxHeight: "calc(100vh - 87px)", // Ensure it doesn't extend beyond the viewport
+          display: isOpen ? "block" : "none",
+          pointerEvents: isOpen ? "auto" : "none",
         }}
-        className="w-full bg-customBackground flex flex-col" // Added flex column to control inner content layout
       >
-        <div className="w-[90%] mx-auto flex flex-col flex-1 py-6 overflow-hidden">
-          {/* Using flex-col and flex-1 to control vertical spacing */}
-          <form
-            onSubmit={handleSearch}
-            className="flex items-center justify-between border-b-1  mb-4"
-          >
-            <input
-              type="text"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="p-4 md:h-[6rem] w-full md:text-3xl opacity-70 focus:outline-none text-center placeholder:font-bold placeholder:text-black md:placeholder:text-3xl placeholder:capitalize placeholder:opacity-70"
-              placeholder="Search for products, brands, and more..."
-              autoFocus
-            />
-            {/* Search submit button */}
-
-            {/* Animated hamburger close button with just 2 divs that form an X when active */}
-            <button
-              type="button"
-              onClick={toggleSearch}
-              className="relative w-14 h-14 focus:outline-none cursor-pointer"
-              aria-label="Close search"
-              // w-14 and h-14 make the button much larger for easier interaction
+        <div className="w-full h-full flex flex-col overflow-hidden">
+          <div className="w-[90%] mx-auto flex flex-col flex-1 py-6">
+            <form
+              onSubmit={handleSearch}
+              className="flex items-center justify-between border-b mb-4"
             >
-              {/* First line of the X - rotates to 45 degrees when open */}
-              <motion.div
-                initial={false}
-                animate={{
-                  rotate: isOpen ? 45 : 0,
-                  y: isOpen ? 0 : -10, // Move further for larger button
-                }}
-                transition={{
-                  duration: 0.4,
-                  ease: [0.22, 1, 0.36, 1],
-                }}
-                className="absolute top-1/2 left-0 w-14 h-1 bg-gray-800 transform -translate-y-1/2"
-                // w-14 for longer line, h-1 for thicker line
-              ></motion.div>
+              <input
+                type="text"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                ref={searchInputRef}
+                className="p-4 md:h-[6rem] w-full md:text-3xl opacity-70 focus:outline-none text-center placeholder:font-bold placeholder:text-black md:placeholder:text-3xl placeholder:capitalize placeholder:opacity-70"
+                placeholder="Search for products, brands, and more..."
+                autoFocus
+              />
 
-              {/* Second line of the X - rotates to -45 degrees when open */}
-              <motion.div
-                initial={false}
-                animate={{
-                  rotate: isOpen ? -45 : 0,
-                  y: isOpen ? 0 : 10, // Move further for larger button
-                }}
-                transition={{
-                  duration: 0.4,
-                  ease: [0.22, 1, 0.36, 1],
-                }}
-                className="absolute top-1/2 left-0 w-14 h-1 bg-gray-800 transform -translate-y-1/2"
-                // w-14 for longer line, h-1 for thicker line
-              ></motion.div>
-            </button>
-          </form>
+              {/* Animated close button */}
+              <button
+                type="button"
+                onClick={toggleSearch}
+                className="relative w-14 h-14 focus:outline-none cursor-pointer"
+                aria-label="Close search"
+              >
+                {/* First line of the X */}
+                <motion.div
+                  initial={false}
+                  animate={{ rotate: 45, y: 0 }}
+                  transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
+                  className="absolute top-1/2 left-0 w-14 h-1 bg-gray-800 transform -translate-y-1/2"
+                ></motion.div>
 
-          {/* Search content area with proper flex sizing */}
-          <div className="flex-1 overflow-y-auto">
-            {/* Content will be scrollable if it overflows */}
-            {/* render the search items */}
-          </div>
+                {/* Second line of the X */}
+                <motion.div
+                  initial={false}
+                  animate={{ rotate: -45, y: 0 }}
+                  transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
+                  className="absolute top-1/2 left-0 w-14 h-1 bg-gray-800 transform -translate-y-1/2"
+                ></motion.div>
+              </button>
+            </form>
 
-          {/* Footer helper text - positioned at the bottom */}
-          <div className="mt-auto pt-2 text-sm text-gray-500">
-            Press ESC to close search
+            {/* Search content area - scrollable if content overflows */}
+            <div className="flex-1 overflow-y-auto">
+              {/* Search results would be rendered here */}
+              <div className="py-4">
+                {/* Placeholder for search results */}
+                <p className="text-center text-gray-500 italic">
+                  Start typing to search products...
+                </p>
+              </div>
+            </div>
+
+            {/* Footer helper text */}
+            <div className="pt-4 text-sm text-center text-gray-500">
+              Press ESC to close search
+            </div>
           </div>
         </div>
       </motion.div>

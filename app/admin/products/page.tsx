@@ -1,19 +1,14 @@
 "use client";
 
-import Link from "next/link";
-import Image from "next/image";
-import { Plus, Pencil, Trash2 } from "lucide-react";
-import { useAdminProducts } from "@/hooks/useAdminProducts";
-import { useState } from "react";
-import { toast } from "sonner";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { ProductProps } from "@/types/product_types";
-import formatPrice from "@/libs/helpers";
-import { useProduct } from "@/hooks/useProduct";
-import { useSession } from "next-auth/react";
-import axios from "axios";
 import { DeleteProduct } from "@/components/deleteProduct";
 import { Button } from "@/components/ui/button";
+import { useAdminProducts } from "@/hooks/useAdminProducts";
+import formatPrice from "@/libs/helpers";
+import { ProductProps } from "@/types/product_types";
+import { Plus } from "lucide-react";
+import Image from "next/image";
+import Link from "next/link";
+import { useState } from "react";
 
 /**
  * Products list component with React Query integration
@@ -21,16 +16,22 @@ import { Button } from "@/components/ui/button";
  */
 function ProductsList() {
   const [currentPage, setCurrentPage] = useState(1);
-  const [isDeleting, setIsDeleting] = useState<string | null>(null);
-  const queryClient = useQueryClient();
 
   // Use our specialized admin products hook
   const productsQuery = useAdminProducts(currentPage, 10);
 
   const products = productsQuery.data?.products || [];
+  // Calculate pagination details from the total count and items per page
+  const totalProducts = productsQuery.data?.count || 0;
+  const itemsPerPage = 10;
+  const totalPages = Math.ceil(totalProducts / itemsPerPage);
 
   const handlePageChange = (newPage: number) => {
+    // Ensure page is within valid range
+    if (newPage < 1 || newPage > totalPages) return;
     setCurrentPage(newPage);
+    // Scroll to top when page changes for better UX
+    window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
   if (products.length === 0) {
@@ -165,7 +166,7 @@ function ProductsList() {
           </div>
 
           {/* Pagination */}
-          {/* {pagination && pagination.pages > 1 && (
+          {totalPages > 1 && (
             <div className="flex justify-center mt-6">
               <nav className="relative z-0 inline-flex rounded-md shadow-sm -space-x-px">
                 <button
@@ -179,26 +180,114 @@ function ProductsList() {
                 >
                   Previous
                 </button>
-                {Array.from({ length: pagination.pages }, (_, i) => i + 1).map(
-                  (page) => (
-                    <button
-                      key={page}
-                      onClick={() => handlePageChange(page)}
-                      className={`relative inline-flex items-center px-4 py-2 border text-sm font-medium ${
-                        currentPage === page
-                          ? "z-10 bg-blue-50 border-blue-500 text-blue-600"
-                          : "bg-white border-gray-300 text-gray-500 hover:bg-gray-50"
-                      }`}
-                    >
-                      {page}
-                    </button>
-                  )
-                )}
+                {/* Smart pagination with ellipsis for better UX with many pages */}
+                {(() => {
+                  // Function to render page buttons with proper ellipses
+                  const renderPageButtons = () => {
+                    const buttons = [];
+
+                    // Always show first page
+                    if (totalPages > 0) {
+                      buttons.push(
+                        <button
+                          key={1}
+                          onClick={() => handlePageChange(1)}
+                          className={`relative inline-flex items-center px-4 py-2 border text-sm font-medium ${
+                            currentPage === 1
+                              ? "z-10 bg-blue-50 border-blue-500 text-blue-600"
+                              : "bg-white border-gray-300 text-gray-500 hover:bg-gray-50"
+                          }`}
+                          aria-current={currentPage === 1 ? "page" : undefined}
+                          aria-label="Page 1"
+                        >
+                          1
+                        </button>
+                      );
+                    }
+
+                    // Show ellipsis if needed
+                    if (currentPage > 3) {
+                      buttons.push(
+                        <span
+                          key="start-ellipsis"
+                          className="relative inline-flex items-center px-4 py-2 border border-gray-300 bg-white text-sm font-medium text-gray-700"
+                        >
+                          ...
+                        </span>
+                      );
+                    }
+
+                    // Calculate range of pages to show around current page
+                    const startPage = Math.max(2, currentPage - 1);
+                    const endPage = Math.min(totalPages - 1, currentPage + 1);
+
+                    // Show pages around current page
+                    for (let i = startPage; i <= endPage; i++) {
+                      // Skip first and last page as they're handled separately
+                      if (i > 1 && i < totalPages) {
+                        buttons.push(
+                          <button
+                            key={i}
+                            onClick={() => handlePageChange(i)}
+                            className={`relative inline-flex items-center px-4 py-2 border text-sm font-medium ${
+                              currentPage === i
+                                ? "z-10 bg-blue-50 border-blue-500 text-blue-600"
+                                : "bg-white border-gray-300 text-gray-500 hover:bg-gray-50"
+                            }`}
+                            aria-current={
+                              currentPage === i ? "page" : undefined
+                            }
+                            aria-label={`Page ${i}`}
+                          >
+                            {i}
+                          </button>
+                        );
+                      }
+                    }
+
+                    // Show end ellipsis if needed
+                    if (currentPage < totalPages - 2) {
+                      buttons.push(
+                        <span
+                          key="end-ellipsis"
+                          className="relative inline-flex items-center px-4 py-2 border border-gray-300 bg-white text-sm font-medium text-gray-700"
+                        >
+                          ...
+                        </span>
+                      );
+                    }
+
+                    // Always show last page if we have more than one page
+                    if (totalPages > 1) {
+                      buttons.push(
+                        <button
+                          key={totalPages}
+                          onClick={() => handlePageChange(totalPages)}
+                          className={`relative inline-flex items-center px-4 py-2 border text-sm font-medium ${
+                            currentPage === totalPages
+                              ? "z-10 bg-blue-50 border-blue-500 text-blue-600"
+                              : "bg-white border-gray-300 text-gray-500 hover:bg-gray-50"
+                          }`}
+                          aria-current={
+                            currentPage === totalPages ? "page" : undefined
+                          }
+                          aria-label={`Page ${totalPages}`}
+                        >
+                          {totalPages}
+                        </button>
+                      );
+                    }
+
+                    return buttons;
+                  };
+
+                  return renderPageButtons();
+                })()}
                 <button
                   onClick={() => handlePageChange(currentPage + 1)}
-                  disabled={currentPage >= pagination.pages}
+                  disabled={currentPage >= totalPages}
                   className={`relative inline-flex items-center px-2 py-2 rounded-r-md border border-gray-300 bg-white text-sm font-medium ${
-                    currentPage >= pagination.pages
+                    currentPage >= totalPages
                       ? "text-gray-300 cursor-not-allowed"
                       : "text-gray-500 hover:bg-gray-50"
                   }`}
@@ -207,15 +296,16 @@ function ProductsList() {
                 </button>
               </nav>
             </div>
-          )} */}
+          )}
 
           {/* Query Performance Indicator */}
-          {/* {productsQuery.data?.metadata && (
+          {productsQuery.data?.duration && (
             <div className="text-xs text-gray-500 text-center mt-4">
-              Execution time: {productsQuery.data.metadata.executionTime}ms |
-              Source: {productsQuery.data.metadata.source}
+              {/* Display execution time from the duration field */}
+              Execution time: {productsQuery.data.duration}ms | Total Products:{" "}
+              {productsQuery.data.count || 0}
             </div>
-          )} */}
+          )}
         </>
       )}
     </div>

@@ -1,7 +1,6 @@
 "use client";
 import Link from "next/link";
 import ResponsiveLazyImage from "./lazyImage";
-import Image from "next/image";
 
 interface CategoryCardProps {
   category: {

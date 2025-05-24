@@ -10,7 +10,7 @@ const ProductPage = () => {
     data: product,
     isLoading,
     error,
-  } = useProduct().getProductBySlug(slug as string); // Ensure slug is treated as a string
+  } = useProduct().getProductBySlug(slug as string);
 
   // Handle loading and error states
   if (error) {
@@ -33,13 +33,14 @@ const ProductPage = () => {
       }
     >
       {/* Use our new ProductDisplay component that contains all the product sections */}
-      <ProductDisplay
-        product={{
-          ...product,
-          slug: product?.slug || slug,
-        }}
-        isLoading={isLoading}
-      />
+      {/* Ensure the product is passed only if it is of type ProductProps */}
+      {product && typeof product !== "string" ? (
+        <ProductDisplay product={product} isLoading={isLoading} />
+      ) : (
+        <div className="container mx-auto px-4 py-8">
+          <p className="text-gray-500">Product details are unavailable.</p>
+        </div>
+      )}
     </Suspense>
   );
 };

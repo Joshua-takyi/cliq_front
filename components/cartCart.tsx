@@ -17,9 +17,8 @@ interface CartCardProps {
 export default function CartCard({
   cartDetails, // Add cartDetails to the destructured props
 }: CartCardProps) {
-  // Destructure the item for easier access
   const {
-    items: [{ color, model, quantity, product_Id, slug, total_price }],
+    items: [{ color, model, quantity, slug, total_price }],
   } = cartDetails;
 
   // Format price with currency

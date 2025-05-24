@@ -166,12 +166,12 @@ export const useProduct = () => {
     },
   });
 
-  interface ProductData {
-    count: number;
-    duration: string;
-    message: string;
-    products: ProductProps[];
-  }
+  // interface ProductData {
+  //   count: number;
+  //   duration: string;
+  //   message: string;
+  //   products: ProductProps[];
+  // }
   //   GET PRODUCTS
 
   const getProductById = (id: string) =>
@@ -246,11 +246,13 @@ export const useProduct = () => {
           typeof filters.search === "string" &&
           filters.search.trim() !== ""
         ) {
+          // debugging log for when search parameter is added
           // console.log("Adding search parameter:", filters.search);
           // Use 'q' parameter instead of 'search' for better consistency with search component
           params.append("q", filters.search.trim());
         } else {
-          console.log("No search parameter to add");
+          // debugging log for when no search parameter is added
+          // console.log("No search parameter to add");
         }
         if (filters.tags) params.append("tags", filters.tags);
         if (filters.models) params.append("models", filters.models);
@@ -322,12 +324,20 @@ export const useProduct = () => {
     });
 
   const getsimilarProducts = (slug: string) => {
-    useQuery<ProductProps, unknown>({
+    return useQuery<ProductProps, unknown>({
       queryKey: ["get_similar_products", slug],
       queryFn: async () => {
-        const res = await axios.get(`${API_URL}/get_similar_products/${slug}`);
-        return res.data;
+        try {
+          console.log(`Fetching similar products for: ${slug}`);
+          // Note: According to your router.go, this is a POST endpoint, not GET
+          const res = await axios.post(`${API_URL}/get_similar_products`, { slug });
+          return res.data;
+        } catch (error) {
+          console.error("Error fetching similar products:", error);
+          throw error;
+        }
       },
+      enabled: !!slug, // Only run query when slug is available
     });
   };
   return {

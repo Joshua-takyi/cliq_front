@@ -62,3 +62,35 @@ export const conditionalHeader = [
       "High-quality headphones designed for an immersive audio experience.\nExplore our collection to find the perfect pair that suits your style and sound preferences.",
   },
 ];
+
+export const ghanaRegions = [
+  "Greater Accra",
+  "Ashanti",
+  "Western",
+  "Eastern",
+  "Central",
+  "Northern",
+  "Upper East",
+  "Upper West",
+  "Volta",
+  "Bono",
+  "Bono East",
+  "Ahafo",
+  "Western North",
+  "Oti",
+  "North East",
+  "Savannah",
+];
+
+export const GHANA_REGIONS = [
+  { value: "Greater Accra", label: "Greater Accra" },
+  { value: "Ashanti", label: "Ashanti" },
+  { value: "Central", label: "Central" },
+  { value: "Eastern", label: "Eastern" },
+  { value: "Western", label: "Western" },
+  { value: "Northern", label: "Northern" },
+  { value: "Volta", label: "Volta" },
+  { value: "Brong Ahafo", label: "Brong Ahafo" },
+  { value: "Upper East", label: "Upper East" },
+  { value: "Upper West", label: "Upper West" },
+];

@@ -22,12 +22,10 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
 
   callbacks: {
     async jwt({ token, user }) {
-      // If a user has just signed in, add their information to the token
       if (user) {
         token.sub = user.id; // Ensure sub matches MongoDB _id
         token.id = user.id;
 
-        // add token to user
         token.token = user.token;
         token.role = user.role;
       }

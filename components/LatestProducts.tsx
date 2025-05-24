@@ -17,7 +17,7 @@ export default function LatestProducts({ limit = 4 }: { limit?: number }) {
   const { data, isLoading, isError } = filterProducts(filterParams, limit, 1);
 
   // Debug the response data to verify if products are being returned
-  console.log("Latest Products Query Response:", data);
+  // console.log("Latest Products Query Response:", data);
 
   const sectionWrapper = (content: React.ReactNode) => (
     <section className="py-16 ">

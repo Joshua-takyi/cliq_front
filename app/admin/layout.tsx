@@ -1,9 +1,9 @@
 "use client";
 
+import { useSession } from "next-auth/react";
 // import { useSession } from "next-auth/react";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 
 export default function AdminLayout({
   children,
@@ -11,7 +11,6 @@ export default function AdminLayout({
   children: React.ReactNode;
 }>) {
   const pathname = usePathname();
-  const router = useRouter();
   const navItems = [
     { name: "Dashboard", href: "/admin" },
     { name: "Products", href: "/admin/products" },
@@ -19,11 +18,13 @@ export default function AdminLayout({
     { name: "Customers", href: "/admin/customers" },
     { name: "Admin Panel", href: "/admin/adminPanel" },
   ];
-  // const session = useSession();
 
-  // if (session.data?.user.role !== "admin") {
-  //   router.push("/"); // Redirect to home if not admin
-  // }
+  const router = useRouter();
+  const session = useSession();
+
+  if (session.data?.user.role !== "admin") {
+    router.push("/"); // Redirect to home if not admin
+  }
   const isActive = (href: string) => href === pathname;
   return (
     <div className="min-h-screen bg-gray-50">

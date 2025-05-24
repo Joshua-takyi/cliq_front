@@ -1,24 +1,27 @@
 "use client";
 
-import { signOut } from "next-auth/react";
-import { useState } from "react";
-import { useRouter } from "next/navigation";
-import { Button } from "@/components/ui/button";
 import {
   AlertDialog,
-  AlertDialogTrigger,
+  AlertDialogAction,
+  AlertDialogCancel,
   AlertDialogContent,
-  AlertDialogHeader,
-  AlertDialogTitle,
   AlertDialogDescription,
   AlertDialogFooter,
-  AlertDialogCancel,
-  AlertDialogAction,
+  AlertDialogHeader,
+  AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import { Button } from "@/components/ui/button";
+import { signOut } from "next-auth/react";
+import { useState } from "react";
 
-export default function SignOutDialog() {
+// Accept onCancel as a prop to communicate back to parent component
+interface SignOutDialogProps {
+  onCancel?: () => void;
+}
+
+// SignOutDialog component that handles the dialog UI and functionality
+function SignOutDialog({ onCancel }: SignOutDialogProps) {
   const [isLoading, setIsLoading] = useState(false); // Track loading state for sign out
-  const router = useRouter();
 
   // Handles the sign out process using next-auth
   const handleSignOut = async () => {
@@ -26,15 +29,18 @@ export default function SignOutDialog() {
     try {
       await signOut({ callbackUrl: "/" }); // Redirect to home after sign out
     } catch (error) {
-      console.error("Sign out error:", error); // Log any errors
+      console.error("Sign out error:", error); // Log detailed error for debugging purposes
     } finally {
       setIsLoading(false);
     }
   };
 
-  // Handles cancel action, navigates back to home
+  // Handles cancel action by calling the passed onCancel callback
   const handleCancel = () => {
-    router.push("/");
+    // Call the onCancel callback if provided to notify parent to close dialog
+    if (onCancel) {
+      onCancel();
+    }
   };
 
   return (
@@ -79,6 +85,6 @@ export default function SignOutDialog() {
   );
 }
 
-// This component uses a responsive flexbox layout to center the modal on all devices.
-// The AlertDialogContent is styled for a modern, clean appearance with rounded corners and shadow.
-// Button layout adapts for mobile (stacked) and desktop (inline) for better usability.
+export default function SignOutPage() {
+  return <SignOutDialog />;
+}

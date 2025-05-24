@@ -1,15 +1,14 @@
 "use client"; // This directive marks the component as a client component, enabling React hooks
 
-import { useState } from "react";
 import { useProduct } from "@/hooks/useProduct";
-import ProductCard from "./productCard";
-import { useSearchParams, useRouter } from "next/navigation";
 import { ProductProps } from "@/types/product_types";
-import FilterPanel from "./FilterPanel";
 import { Filter } from "lucide-react";
+import { useSearchParams } from "next/navigation";
+import { useState } from "react";
+import FilterPanel from "./FilterPanel";
+import ProductCard from "./productCard";
 
 export default function Grid() {
-  const router = useRouter();
   const searchParams = useSearchParams();
   const page = parseInt(searchParams.get("page") || "1");
   const limit = parseInt(searchParams.get("limit") || "12");

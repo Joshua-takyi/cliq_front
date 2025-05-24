@@ -135,7 +135,8 @@ export const ImageCarousel: React.FC<ImageCarouselProps> = ({
             drag="x"
             dragConstraints={{ left: 0, right: 0 }}
             dragElastic={1}
-            onDragEnd={(e, { offset, velocity }) => {
+            onDragEnd={(_, { offset, velocity }) => {
+              // Using underscore (_) to indicate an unused parameter
               const swipe = swipePower(offset.x, velocity.x);
 
               if (swipe < -swipeConfidenceThreshold) {

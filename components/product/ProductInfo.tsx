@@ -18,7 +18,7 @@ interface ProductInfoProps {
  */
 const ProductInfo: React.FC<ProductInfoProps> = ({
   product,
-  selectedColor,
+  // selectedColor,
 }) => {
   // Calculate the discount price if applicable
   const discountedPrice = product.discount

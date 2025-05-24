@@ -1,6 +1,6 @@
 "use client";
 import { ChevronLeft, ChevronRight } from "lucide-react"; // Import chevron icons for better visibility
-import React, { CSSProperties, useEffect, useRef, useState } from "react"; // Added for React.CSSProperties
+import React, { CSSProperties, useRef } from "react"; // Added for React.CSSProperties
 import Slider from "react-slick";
 import "slick-carousel/slick/slick-theme.css";
 import "slick-carousel/slick/slick.css";
@@ -269,7 +269,7 @@ interface ArrowProps {
 }
 
 const PrevArrow = (props: ArrowProps) => {
-  const { className, style, onClick } = props;
+  const { onClick } = props;
   return (
     <div
       className="custom-arrow custom-arrow-prev"
@@ -282,7 +282,7 @@ const PrevArrow = (props: ArrowProps) => {
 };
 
 const NextArrow = (props: ArrowProps) => {
-  const { className, style, onClick } = props;
+  const { onClick } = props;
   return (
     <div
       className="custom-arrow custom-arrow-next"
@@ -295,30 +295,9 @@ const NextArrow = (props: ArrowProps) => {
 };
 
 const Categories = () => {
-  const [activeSlide, setActiveSlide] = useState(0);
+  // Removed unused activeSlide state to eliminate the compile error
   const sliderRef = useRef(null);
-  const [windowWidth, setWindowWidth] = useState(
-    typeof window !== "undefined" ? window.innerWidth : 0
-  );
-
-  // Update window width on resize
-  useEffect(() => {
-    const handleResize = () => {
-      setWindowWidth(window.innerWidth);
-    };
-
-    // Check if window is defined (for Next.js)
-    if (typeof window !== "undefined") {
-      window.addEventListener("resize", handleResize);
-      handleResize(); // Initial call
-    }
-
-    return () => {
-      if (typeof window !== "undefined") {
-        window.removeEventListener("resize", handleResize);
-      }
-    };
-  }, []);
+  // Removed unused windowWidth state and resize logic to eliminate the compile error
 
   const settings = {
     dots: false,
@@ -332,7 +311,7 @@ const Categories = () => {
     swipeToSlide: true, // Enable swipe for better mobile interaction
     prevArrow: <PrevArrow />, // Custom prev arrow
     nextArrow: <NextArrow />, // Custom next arrow
-    afterChange: (current: number) => setActiveSlide(current),
+    // Removed afterChange callback as activeSlide is no longer used
     centerMode: false, // Ensure cards are aligned to the left
     centerPadding: "0px", // No extra padding
     responsive: [

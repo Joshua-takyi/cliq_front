@@ -13,10 +13,6 @@ const formatPrice = (price: number, currency = "GHS"): string => {
   }).format(price);
 };
 
-const formatName = (title: string): string => {
-  return title.length > 50 ? `${title.slice(0, 50)}...` : title;
-};
-
 // Props Interface
 export interface ProductCardProps {
   product: {

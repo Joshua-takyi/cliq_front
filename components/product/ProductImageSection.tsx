@@ -1,10 +1,7 @@
 "use client";
 
-import { useState, useRef } from "react";
+import { useRef, useState } from "react";
 import ImageCarousel from "../productImageCarousel";
-import { motion } from "framer-motion";
-import FullscreenImageViewer from "./FullscreenImageViewer";
-import { toast } from "../ui/use-toast";
 
 interface ProductImageSectionProps {
   images: string[];

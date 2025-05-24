@@ -30,17 +30,7 @@ const ProductActions: React.FC<ProductActionsProps> = ({
     setIsAddingToCart(true);
 
     try {
-      // Here you would implement the actual cart functionality
-      // For example, make an API call to add the item to the cart
-      // This is a placeholder for demonstration
       await new Promise((resolve) => setTimeout(resolve, 1000));
-
-      // Show success feedback (you could add a toast notification here)
-      //   console.log("Added to cart:", {
-      //     productId: product.id,
-      //     quantity,
-      //     color: selectedColor,
-      //   });
     } catch (error) {
       console.error("Failed to add to cart:", error);
       // Show error feedback
@@ -54,15 +44,11 @@ const ProductActions: React.FC<ProductActionsProps> = ({
     setIsAddingToWishlist(true);
 
     try {
-      // Here you would implement the actual wishlist functionality
-      // For example, make an API call to add the item to the wishlist
       await new Promise((resolve) => setTimeout(resolve, 1000));
-
-      // Show success feedback (you could add a toast notification here)
-      //   console.log("Added to wishlist:", product.id);
     } catch (error) {
       console.error("Failed to add to wishlist:", error);
       // Show error feedback
+      ``;
     } finally {
       setIsAddingToWishlist(false);
     }
