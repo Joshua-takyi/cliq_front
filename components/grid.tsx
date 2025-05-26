@@ -1,11 +1,11 @@
 "use client"; // This directive marks the component as a client component, enabling React hooks
 
+import Loader from "@/app/loading";
 import { useProduct } from "@/hooks/useProduct";
 import { ProductProps } from "@/types/product_types";
 import { Filter } from "lucide-react";
 import { useSearchParams } from "next/navigation";
 import { useState } from "react";
-import FilterPanel from "./FilterPanel";
 import ProductCard from "./productCard";
 
 export default function Grid() {
@@ -53,16 +53,7 @@ export default function Grid() {
 
   // Handle loading state
   if (isLoading) {
-    return (
-      <div className="flex justify-center items-center h-64">
-        <div className="text-center">
-          <div className="w-12 h-12 border-t-2 border-b-2 border-gray-900 rounded-full animate-spin mx-auto mb-4"></div>
-          <h1 className="text-xl font-medium text-gray-700">
-            Loading products...
-          </h1>
-        </div>
-      </div>
-    );
+    return <Loader />;
   }
 
   // Only check for empty products after loading is complete
@@ -81,39 +72,16 @@ export default function Grid() {
     );
   }
 
-  // Render product grid with filter button and panel
   return (
     <div>
-      {/* Filter button and active filter indicators */}
-      <div className="flex justify-between items-center mb-6 px-4 lg:px-0">
-        <div className="flex space-x-2">
-          {/* Filter tags to show active filters */}
-          {colors && (
-            <span className="bg-gray-100 text-xs px-2 py-1 rounded-full">
-              Colors: {colors.split(",").length}
-            </span>
-          )}
-          {models && (
-            <span className="bg-gray-100 text-xs px-2 py-1 rounded-full">
-              Models: {models.split(",").length}
-            </span>
-          )}
-          {(minPrice || maxPrice) && (
-            <span className="bg-gray-100 text-xs px-2 py-1 rounded-full">
-              Price Filter
-            </span>
-          )}
-        </div>
-
-        {/* Filter button */}
-        <button
-          onClick={toggleFilter}
-          className="flex items-center space-x-1 px-3 py-1.5 border border-gray-300 rounded-md hover:bg-gray-50"
-        >
-          <Filter size={16} />
-          <span>Filter</span>
-        </button>
-      </div>
+      {/* Filter button */}
+      <button
+        onClick={toggleFilter}
+        className="flex items-center space-x-1 px-3 py-1.5 border border-gray-300 rounded-md hover:bg-gray-50"
+      >
+        <Filter size={16} />
+        <span>Filter</span>
+      </button>
 
       {/* Products grid */}
       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 px-1 gap-2  lg:px-0">
@@ -127,12 +95,6 @@ export default function Grid() {
           />
         ))}
       </div>
-
-      {/* Filter Panel */}
-      <FilterPanel
-        isOpen={isFilterOpen}
-        onClose={() => setIsFilterOpen(false)}
-      />
     </div>
   );
 }

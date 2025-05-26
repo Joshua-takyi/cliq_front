@@ -28,33 +28,6 @@ const nextConfig: NextConfig = {
       },
     ],
   },
-  // Ensure API routes work properly with external requests
-  async headers() {
-    return [
-      {
-        // Apply these headers to all routes
-        source: "/(.*)",
-        headers: [
-          // Allow requests from any origin
-          {
-            key: "Access-Control-Allow-Origin",
-            value: "*",
-          },
-          // Allow specific HTTP methods
-          {
-            key: "Access-Control-Allow-Methods",
-            value: "GET, POST, PUT, DELETE, OPTIONS",
-          },
-          // Allow specific headers
-          {
-            key: "Access-Control-Allow-Headers",
-            value:
-              "X-Requested-With, Content-Type, Accept, Authorization, x-paystack-signature",
-          },
-        ],
-      },
-    ];
-  },
 };
 
 export default nextConfig;

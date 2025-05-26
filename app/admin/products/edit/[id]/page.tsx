@@ -1,5 +1,6 @@
 "use client";
 
+import Loader from "@/app/loading";
 import ProductForm from "@/components/form";
 import { useProduct } from "@/hooks/useProduct";
 import { ArrowLeft } from "lucide-react";
@@ -15,11 +16,7 @@ function EditProductContainer() {
   const { data: product, isLoading, isError } = getProductById(productId);
 
   if (isLoading) {
-    return (
-      <div className="py-16 text-center">
-        <p className="text-gray-500">Loading product data...</p>
-      </div>
-    );
+    return <Loader />;
   }
   if (isError) {
     return (

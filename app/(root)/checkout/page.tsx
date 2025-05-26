@@ -1,6 +1,7 @@
 "use client";
 
 import { GHANA_REGIONS } from "@/-database/db";
+import Loader from "@/app/loading";
 import { useCheckout } from "@/app/services/checkout";
 import CheckoutFormInput from "@/components/CheckoutFormInput";
 import ResponsiveLazyImage from "@/components/lazyImage";
@@ -14,6 +15,11 @@ import { useSession } from "next-auth/react";
 import Image from "next/image";
 import { FormEvent, useEffect, useState } from "react";
 import { toast } from "sonner";
+
+const calculateDeliveryFee = (region: string): number => {
+  const isAccra = region.toLowerCase().includes("accra");
+  return isAccra ? 30 : 50;
+};
 
 export default function CheckoutPage() {
   const { GetCart } = UseCart();
@@ -116,19 +122,16 @@ export default function CheckoutPage() {
   const handleSubmit = (e: FormEvent) => {
     e.preventDefault();
 
-    // Form validation
     if (!validateForm()) {
       toast.error("Please correct the errors in the form before proceeding");
       return;
     }
 
-    // Validate user is logged in
     if (!session?.data?.user?.email) {
       toast.error("Please sign in to your account to proceed with checkout");
       return;
     }
 
-    // Check if cart has items
     if (!cartData?.items || cartData.items.length === 0) {
       toast.error("Your cart is empty. Please add items before checkout.");
       return;
@@ -138,9 +141,13 @@ export default function CheckoutPage() {
     const cartTotal =
       cartData?.items.reduce((total, item) => total + item.total_price, 0) || 0;
 
-    // Enhanced payload with shipping details to ensure proper order fulfillment
+    // Get the shipping cost based on region
+    const shippingCost = calculateDeliveryFee(formData.region);
+
+    const finalTotal = cartTotal + shippingCost;
+
     const payload = {
-      amount: cartTotal,
+      amount: finalTotal, // Include both cart subtotal and delivery fee in payment
       email: session.data.user.email,
       shippingInfo: {
         name: formData.name,
@@ -153,7 +160,8 @@ export default function CheckoutPage() {
         notes: (formData as any).orderNotes || "",
       },
       cartItems: cartData.items.map((item) => ({
-        id: item.id,
+        id: item.product_Id,
+        slug: item.slug,
         title: item.title,
         quantity: item.quantity,
         price: item.total_price,
@@ -176,17 +184,13 @@ export default function CheckoutPage() {
   };
 
   if (isLoading) {
-    return (
-      <div className="flex items-center justify-center h-[400px]">
-        <div className="animate-spin rounded-full h-10 w-10 border-t-2 border-b-2 border-gray-900"></div>
-      </div>
-    );
+    return <Loader />;
   }
 
   // Calculate order summary values
   const subtotal =
     cartData?.items.reduce((total, item) => total + item.total_price, 0) || 0;
-  const shipping = 0; // Free shipping for now
+  const shipping = calculateDeliveryFee(formData.region); // Calculate shipping based on region
   const total = subtotal + shipping;
 
   return (
@@ -333,7 +337,7 @@ export default function CheckoutPage() {
                 </span>
               </div>
               <div className="flex justify-between">
-                <span className="text-sm">Shipping</span>
+                <span className="text-sm">Delivery</span>
                 <span className="text-sm">
                   {shipping === 0 ? "Free" : formatPrice(shipping)}
                 </span>

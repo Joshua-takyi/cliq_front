@@ -9,6 +9,7 @@ import { CartData } from "../types/product_types"; // Import product types
 import Link from "next/link";
 import { formatPrice } from "@/lib/utils";
 import { useRouter } from "next/navigation";
+import Loader from "@/app/loading";
 
 export const Cart = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -183,11 +184,7 @@ export const Cart = () => {
   };
 
   if (isLoading) {
-    return (
-      <div>
-        <div className="w-12 h-12 rounded-full border animate-spin" />
-      </div>
-    );
+    return <Loader />;
   }
 
   return (

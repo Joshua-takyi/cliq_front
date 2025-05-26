@@ -7,6 +7,7 @@ import ProductCard from "@/components/productCard";
 import { ProductProps } from "@/types/product_types";
 import FilterPanel from "@/components/FilterPanel";
 import { Filter } from "lucide-react";
+import Loader from "@/app/loading";
 
 export default function SearchPage() {
   // Get search params from URL
@@ -121,10 +122,7 @@ export default function SearchPage() {
 
       {/* Pass a fallback slug if query is null */}
       {isLoading ? (
-        // Display loading indicator while fetching results
-        <div className="flex justify-center items-center h-64">
-          <p className="text-lg">Loading search results...</p>
-        </div>
+        <Loader />
       ) : isError ? (
         // Display error message if there was an error fetching results
         <div className="flex justify-center items-center h-64">

@@ -4,6 +4,7 @@ import { useProfile } from "@/hooks/useProfile";
 import { useEffect } from "react";
 import { User, Phone, Mail, MapPin, Home, Navigation } from "lucide-react";
 import { CheckoutFormData } from "@/types/product_types";
+import Loader from "@/app/loading";
 
 export default function PersonalInfoComponent() {
   const { getUserInfo } = useProfile();
@@ -14,14 +15,7 @@ export default function PersonalInfoComponent() {
   }, [refetch]);
 
   if (isLoading) {
-    return (
-      <div className="flex justify-center items-center h-64">
-        <div className="text-center">
-          <div className="w-12 h-12 border-t-2 border-b-2 border-gray-900 rounded-full animate-spin mx-auto mb-4"></div>
-          <p>Loading personal information...</p>
-        </div>
-      </div>
-    );
+    return <Loader />;
   }
 
   if (!data || data?.length === 0) {

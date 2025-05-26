@@ -1,5 +1,6 @@
 "use client";
 
+import { UseCart } from "@/hooks/useCart";
 import { useMutation } from "@tanstack/react-query";
 import axios from "axios";
 
@@ -7,6 +8,7 @@ interface VerifyPaymentPayload {
   reference: string;
 }
 export const useVerifyPayment = () => {
+  const { ClearCart } = UseCart();
   const API_URL =
     process.env.NODE_ENV === "development"
       ? process.env.NEXT_PUBLIC_DEVELOPMENT || "/api"
@@ -29,11 +31,12 @@ export const useVerifyPayment = () => {
       return res.data.data;
     },
 
-    onSuccess: (data) => {
+    onSuccess: () => {
       // debug console.log("Payment verification response:", data);
-      console.log("Payment verification successful:", data);
+      // console.log("Payment verification successful:", data);
       // Handle successful payment verification logic here
       //   clear cart
+      ClearCart.mutate();
       //   toast.success("cart cleared successfully");
       //   queryClient.invalidateQueries({ queryKey: ["get_cart"] });
     },

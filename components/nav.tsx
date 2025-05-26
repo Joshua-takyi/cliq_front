@@ -240,7 +240,7 @@ export const Nav = () => {
                 className="hidden md:block"
               >
                 <Link
-                  href="/profile/address"
+                  href="/profile/order"
                   className="md:p-1 lg:p-2 font-medium md:text-sm lg:text-base"
                 >
                   Profile

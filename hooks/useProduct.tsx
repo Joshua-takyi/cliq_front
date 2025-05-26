@@ -3,6 +3,7 @@ import axios from "axios";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { ApiResponse, ProductProps } from "../types/product_types";
 import { useSession } from "next-auth/react";
+import { resolve } from "path";
 
 // Define a custom hook for product-related operations
 export const useProduct = () => {
@@ -166,18 +167,13 @@ export const useProduct = () => {
     },
   });
 
-  // interface ProductData {
-  //   count: number;
-  //   duration: string;
-  //   message: string;
-  //   products: ProductProps[];
-  // }
   //   GET PRODUCTS
 
   const getProductById = (id: string) =>
     useQuery<ProductProps, unknown>({
       queryKey: ["product", id],
       queryFn: async () => {
+        // Introduce a delay of 2000ms (2 seconds) using setTimeout within a Promise
         const res = await axios.get<ApiResponse<ProductProps>>(
           `${API_URL}/get_product_by_id/${id}`
         );
@@ -330,7 +326,9 @@ export const useProduct = () => {
         try {
           console.log(`Fetching similar products for: ${slug}`);
           // Note: According to your router.go, this is a POST endpoint, not GET
-          const res = await axios.post(`${API_URL}/get_similar_products`, { slug });
+          const res = await axios.post(`${API_URL}/get_similar_products`, {
+            slug,
+          });
           return res.data;
         } catch (error) {
           console.error("Error fetching similar products:", error);

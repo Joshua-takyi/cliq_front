@@ -2,17 +2,22 @@
 import { useProduct } from "@/hooks/useProduct";
 import { useParams } from "next/navigation";
 import ProductDisplay from "@/components/product/ProductDisplay";
-import { Suspense } from "react";
+import Loader from "@/app/loading";
 
 const ProductPage = () => {
-  const { slug } = useParams(); // Extract slug from URL parameters
+  const { slug } = useParams();
   const {
     data: product,
     isLoading,
     error,
   } = useProduct().getProductBySlug(slug as string);
 
-  // Handle loading and error states
+  // Handle loading state
+  if (isLoading) {
+    return <Loader />;
+  }
+
+  // Handle error state
   if (error) {
     console.error("Error loading product:", error);
     return (
@@ -25,24 +30,22 @@ const ProductPage = () => {
     );
   }
 
-  // Render our comprehensive product display component
-  return (
-    <Suspense
-      fallback={
-        <div className="container mx-auto px-4 py-8">Loading product...</div>
-      }
-    >
-      {/* Use our new ProductDisplay component that contains all the product sections */}
-      {/* Ensure the product is passed only if it is of type ProductProps */}
-      {product && typeof product !== "string" ? (
-        <ProductDisplay product={product} isLoading={isLoading} />
-      ) : (
-        <div className="container mx-auto px-4 py-8">
-          <p className="text-gray-500">Product details are unavailable.</p>
+  // Handle product not found
+  if (!product || typeof product === "string") {
+    return (
+      <div className="container mx-auto px-4 py-8">
+        <div>
+          <h2 className="text-2xl font-bold mb-4">Product Not Found</h2>
+          <p className="text-gray-500">
+            The product you are looking for does not exist or has been removed.
+          </p>
         </div>
-      )}
-    </Suspense>
-  );
+      </div>
+    );
+  }
+
+  // Render the product
+  return <ProductDisplay product={product} isLoading={false} />;
 };
 
 export default ProductPage;

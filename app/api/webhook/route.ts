@@ -1,236 +1,238 @@
-// USE DETAILED ERROR HANDLING
 import { NextResponse } from "next/server";
 import crypto from "crypto";
 import client from "@/libs/connect";
 
+// Simple function to generate order ID
+function generateOrderId(): string {
+  return `ORD-${Date.now()}-${Math.random()
+    .toString(36)
+    .substring(2, 8)
+    .toUpperCase()}`;
+}
+
 export async function POST(req: Request) {
-  console.log("Webhook endpoint called"); // Debug log to confirm route is being hit
+  console.log("Webhook endpoint called");
 
   try {
     const rawBody = await req.text();
     const signature = req.headers.get("x-paystack-signature");
     const secret = process.env.PAYSTACK_SECRET_KEY;
 
-    // Check if secret key exists
     if (!secret) {
-      console.error("Missing Paystack secret key in environment variables");
+      console.error("Missing Paystack secret key");
       return NextResponse.json(
-        {
-          success: false,
-          error: "Secret key is not defined.",
-          message: "secret key is not defined in environment variables",
-        },
+        { success: false, message: "Secret key missing" },
         { status: 500 }
       );
     }
 
-    // Compute signature from request body
+    // Verify signature
     const computedSignature = crypto
       .createHmac("sha512", secret)
       .update(rawBody)
       .digest("hex");
 
-    // Validate signature for security
-    // Only proceed if signatures match to ensure request is from Paystack
-    try {
-      if (
-        !signature ||
-        !crypto.timingSafeEqual(
-          Buffer.from(signature),
-          Buffer.from(computedSignature)
-        )
-      ) {
-        console.error("Webhook signature verification failed");
-        return NextResponse.json(
-          {
-            success: false,
-            message: "Unauthorized: Signature verification failed",
-          },
-          { status: 401 }
-        );
-      }
-    } catch (signatureError) {
-      console.error("Error during signature verification:", signatureError);
+    if (!signature || signature !== computedSignature) {
+      console.error("Invalid signature");
       return NextResponse.json(
-        {
-          success: false,
-          message: "Signature verification error",
-          error:
-            signatureError instanceof Error
-              ? signatureError.message
-              : String(signatureError),
-        },
+        { success: false, message: "Invalid signature" },
         { status: 401 }
       );
     }
 
-    // Parse the webhook payload
-    const data = JSON.parse(rawBody);
-    console.log("Webhook event received:", data.event); // Log the event type
+    // Parse webhook data
+    const webhookData = JSON.parse(rawBody);
+    console.log("Event:", webhookData.event);
 
-    // Handle different event types
-    if (data.event === "charge.success") {
-      const { amount, metadata } = data.data;
+    // Only handle successful payments
+    if (webhookData.event === "charge.success") {
+      const { data } = webhookData;
+      const { amount, metadata, reference } = data;
 
-      // Enhanced validation for required fields
-      if (!amount || !metadata) {
-        console.error("Invalid payload: Missing amount or metadata");
+      // Basic validation
+      if (!amount || !metadata?.shippingInfo?.email) {
         return NextResponse.json(
-          {
-            success: false,
-            message:
-              "Invalid payload: Required fields (amount, metadata) are missing",
-          },
+          { success: false, message: "Missing required data" },
           { status: 400 }
         );
       }
 
-      // Process the payment here
       try {
-        // Connect to database
         await client.connect();
         const db = client.db();
 
-        // Start a session for transaction
-        const session = client.startSession();
-        session.startTransaction();
+        // Check if order already exists (prevent duplicates)
+        const existingOrder = await db.collection("orders").findOne({
+          "payment.reference": reference,
+        });
 
-        try {
-          const orders = db.collection("orders");
-          const users = db.collection("users");
-
-          // Find user by email from metadata
-          const user = await users.findOne(
-            { email: metadata.shippingInfo.email },
-            { session }
-          );
-
-          if (!user) {
-            console.error(
-              `User not found for email: ${metadata.shippingInfo.email}`
-            );
-            await session.abortTransaction();
-            session.endSession();
-            return NextResponse.json(
-              {
-                success: false,
-                message: `User not found for email: ${metadata.email}`,
-              },
-              { status: 404 }
-            );
-          } else {
-            // Create new order with comprehensive details
-            const order = {
-              userId: user._id,
-              amount,
-              status: "paid",
-              metadata,
-              paymentReference: data.data.reference,
-              transactionId: data.data.id,
-              paymentChannel: data.data.channel,
-              paymentDate: new Date(),
-              createdAt: new Date(),
-            };
-
-            // Insert order into database
-            const result = await orders.insertOne(order, { session });
-
-            if (result.acknowledged) {
-              // Update user balance or any other necessary operations
-              await users.updateOne(
-                { _id: user._id },
-                { $inc: { balance: amount } },
-                { session }
-              );
-
-              // Commit the transaction
-              await session.commitTransaction();
-              session.endSession();
-
-              console.log(`Order created successfully: ${result.insertedId}`);
-              return NextResponse.json({
-                success: true,
-                orderId: result.insertedId,
-                message: "Payment processed successfully",
-              });
-            } else {
-              // Handle failed order creation
-              await session.abortTransaction();
-              session.endSession();
-
-              console.error(
-                "Failed to create order: Database operation not acknowledged"
-              );
-              return NextResponse.json(
-                {
-                  success: false,
-                  message:
-                    "Failed to create order: Database operation not acknowledged",
-                },
-                { status: 500 }
-              );
-            }
-          }
-        } catch (dbError) {
-          // Handle database operation errors
-          await session.abortTransaction();
-          session.endSession();
-
-          console.error("Database operation error:", dbError);
-          return NextResponse.json(
-            {
-              success: false,
-              error:
-                dbError instanceof Error
-                  ? dbError.message
-                  : "An unknown database error occurred",
-              message: "Failed to process payment due to database error",
-            },
-            { status: 500 }
-          );
-        } finally {
-          // Ensure client connection is properly handled
-          if (client) {
-            try {
-              await client.close();
-            } catch (closeError) {
-              console.error("Error closing database connection:", closeError);
-            }
-          }
+        if (existingOrder) {
+          console.log(`Order already exists for reference: ${reference}`);
+          return NextResponse.json({
+            success: true,
+            message: "Order already processed",
+          });
         }
-      } catch (processError) {
-        console.error("Error processing payment:", processError);
-        return NextResponse.json(
-          {
-            success: false,
-            error:
-              processError instanceof Error
-                ? processError.message
-                : String(processError),
-            message: "Failed to process payment",
+
+        // Find user by email
+        const user = await db.collection("users").findOne({
+          email: metadata.shippingInfo.email.toLowerCase(),
+        });
+
+        if (!user) {
+          console.error(`User not found: ${metadata.shippingInfo.email}`);
+          return NextResponse.json(
+            { success: false, message: "User not found" },
+            { status: 404 }
+          );
+        }
+
+        // Create simple order object
+        const order = {
+          orderId: generateOrderId(),
+          userId: user._id,
+          email: metadata.shippingInfo.email.toLowerCase(),
+
+          // Order status (production-ready delivery statuses)
+          status: "confirmed", // confirmed -> processing -> shipped -> delivered -> cancelled
+          deliveryStatus: "pending", // pending -> preparing -> shipped -> out_for_delivery -> delivered
+
+          // Financial info
+          amount: amount / 100, // Convert from kobo/pesewas
+          currency: data.currency || "GHS",
+
+          // Items from cart
+          items: metadata.cartItems || [],
+
+          // Shipping info
+          shippingInfo: metadata.shippingInfo,
+
+          // Payment info
+          payment: {
+            method: data.channel, // mobile_money, card, etc.
+            status: "completed",
+            provider: "paystack",
+            reference: reference,
+            paystackId: data.id,
+            paidAt: new Date(data.paid_at),
           },
+
+          // Delivery tracking
+          delivery: {
+            estimatedDate: null, // Set when order moves to processing
+            actualDate: null, // Set when delivered
+            trackingNumber: null, // Set when shipped
+            carrier: null, // Set when shipped (e.g., "DHL", "UPS")
+            notes: [],
+          },
+
+          // Timestamps
+          createdAt: new Date(),
+          updatedAt: new Date(),
+        };
+
+        // Save order
+        const result = await db.collection("orders").insertOne(order);
+
+        if (result.acknowledged) {
+          console.log(`Order created: ${order.orderId}`);
+          console.log(`Customer: ${metadata.shippingInfo.name}`);
+          console.log(`Amount: ${order.currency} ${order.amount}`);
+
+          await client.close();
+
+          return NextResponse.json({
+            success: true,
+            orderId: result.insertedId,
+            orderNumber: order.orderId,
+            status: order.status,
+            deliveryStatus: order.deliveryStatus,
+            message: "Payment processed successfully",
+          });
+        } else {
+          throw new Error("Failed to create order");
+        }
+      } catch (error) {
+        console.error("Database error:", error);
+        try {
+          await client.close();
+        } catch (closeError) {
+          console.error("Error closing connection:", closeError);
+        }
+        return NextResponse.json(
+          { success: false, message: "Database error" },
           { status: 500 }
         );
       }
     } else {
-      // Handle other event types - IMPORTANT: Always return a response
-      console.log(`Unhandled event type: ${data.event}`);
-      return NextResponse.json({
-        success: true,
-        message: `Webhook received for event: ${data.event}`,
-        info: "Event acknowledged but no specific processing required",
-      });
+      // Handle other events
+      console.log(`Unhandled event: ${webhookData.event}`);
+      return NextResponse.json({ success: true, message: "Event received" });
     }
   } catch (error) {
-    // Global error handler for unexpected errors
-    console.error("Webhook processing error:", error);
+    console.error("Webhook error:", error);
     return NextResponse.json(
-      {
-        success: false,
-        error: error instanceof Error ? error.message : String(error),
-        message: "An unexpected error occurred while processing the webhook",
-      },
+      { success: false, message: "Webhook processing failed" },
       { status: 500 }
     );
   }
 }
+
+/* 
+DELIVERY STATUS FLOW (Production Ready):
+
+Order Status:
+- confirmed: Payment successful, order confirmed
+- processing: Order being prepared/packed
+- shipped: Order shipped to customer
+- delivered: Order delivered successfully
+- cancelled: Order cancelled
+
+Delivery Status:
+- pending: Waiting to be processed
+- preparing: Being packed/prepared
+- shipped: In transit to customer
+- out_for_delivery: Out for final delivery
+- delivered: Successfully delivered
+
+Usage Example for updating status:
+// Move order to processing
+await db.collection("orders").updateOne(
+  { orderId: "ORD-12345" },
+  { 
+    $set: { 
+      status: "processing",
+      deliveryStatus: "preparing",
+      updatedAt: new Date()
+    }
+  }
+);
+
+// Ship order
+await db.collection("orders").updateOne(
+  { orderId: "ORD-12345" },
+  { 
+    $set: { 
+      status: "shipped",
+      deliveryStatus: "shipped",
+      "delivery.trackingNumber": "TRK123456",
+      "delivery.carrier": "DHL",
+      "delivery.estimatedDate": new Date(Date.now() + 3 * 24 * 60 * 60 * 1000), // 3 days
+      updatedAt: new Date()
+    }
+  }
+);
+
+// Deliver order
+await db.collection("orders").updateOne(
+  { orderId: "ORD-12345" },
+  { 
+    $set: { 
+      status: "delivered",
+      deliveryStatus: "delivered",
+      "delivery.actualDate": new Date(),
+      updatedAt: new Date()
+    }
+  }
+);
+*/

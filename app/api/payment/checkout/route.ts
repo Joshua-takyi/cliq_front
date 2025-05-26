@@ -1,8 +1,15 @@
-// USE DETAILED ERROR HANDLING
-
 import axios from "axios";
 import { NextResponse } from "next/server";
 
+enum orderStatus {
+  PENDING = "pending", // Order has been placed but not yet processed
+  PROCESSING = "processing", // Order is being prepared
+  SHIPPED = "shipped", // Order has been shipped
+  DELIVERED = "delivered", // Order has been delivered to the customer
+  CANCELLED = "cancelled", // Order has been cancelled
+  RETURNED = "returned", // Order has been returned by the customer
+  FAILED = "failed", // Delivery attempt failed
+}
 interface PaymentBody {
   amount: number;
   email: string;
@@ -20,6 +27,7 @@ interface PaymentBody {
       notes?: string;
     };
     cartItems?: any[];
+    status?: orderStatus; // Added status property to align with usage in the code
   };
 }
 
@@ -93,6 +101,7 @@ export async function POST(request: Request) {
       currency: "GHS",
       metadata: {
         ...(shippingInfo && { shippingInfo }),
+        status: orderStatus.PENDING, // Default status for new orders
         ...(body.cartItems && { cartItems: body.cartItems }),
       },
     };
