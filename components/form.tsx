@@ -13,23 +13,35 @@ import { FormWrapper } from "./formWrapper";
 import { FormColors } from "./productAddColor";
 import { FormInput } from "./productAddInput";
 
-// Predefined product categories to ensure consistency
+// Predefined product categories to ensure consistency - comprehensive phone accessory categories
 const PRODUCT_CATEGORIES: OptionItem[] = [
-  { id: "phone-cases", name: "Phone Cases" },
-  { id: "screen-protectors", name: "Screen Protectors" },
-  { id: "chargers", name: "Chargers" },
-  { id: "power-banks", name: "Power Banks" },
-  { id: "headphones", name: "Headphones" },
-  { id: "earbuds", name: "Earbuds" },
-  { id: "smartwatches", name: "Smartwatches" },
-  { id: "watch-bands", name: "Watch Bands" },
-  { id: "cables", name: "Cables" },
-  { id: "adapters", name: "Adapters" },
-  { id: "speakers", name: "Speakers" },
-  { id: "stands", name: "Stands & Holders" },
-  { id: "automotive", name: "Automotive Accessories" },
-  { id: "gaming", name: "Gaming Accessories" },
-  { id: "airpod-case", name: "AirPod Cases" },
+  { id: "Phone Cases and Covers", name: "Phone Cases and Covers" },
+  {
+    id: "Screen Protectors and Privacy Films",
+    name: "Screen Protectors and Privacy Films",
+  },
+  { id: "Chargers and Charging Cables", name: "Chargers and Charging Cables" },
+  { id: "Wireless Chargers and Stands", name: "Wireless Chargers and Stands" },
+  {
+    id: "Power Banks and Portable Chargers",
+    name: "Power Banks and Portable Chargers",
+  },
+  { id: "Phone Holders and Car Mounts", name: "Phone Holders and Car Mounts" },
+  {
+    id: "Headphones and Wireless Earbuds",
+    name: "Headphones and Wireless Earbuds",
+  },
+  { id: "Phone Camera Accessories", name: "Phone Camera Accessories" },
+  { id: "Phone Grips and Pop Sockets", name: "Phone Grips and Pop Sockets" },
+  {
+    id: "Phone Cleaning and Maintenance",
+    name: "Phone Cleaning and Maintenance",
+  },
+  {
+    id: "Selfie Sticks and Phone Tripods",
+    name: "Selfie Sticks and Phone Tripods",
+  },
+  { id: "Phone Straps and Lanyards", name: "Phone Straps and Lanyards" },
 ];
 
 // Predefined product tags for better organization and filtering
@@ -40,9 +52,9 @@ const PRODUCT_TAGS: OptionItem[] = [
   { id: "samsung", name: "Samsung Compatible" },
   { id: "google", name: "Google Compatible" },
   { id: "wireless", name: "Wireless" },
-  { id: "fast-charging", name: "Fast Charging" },
+  { id: "fast charging", name: "Fast Charging" },
   { id: "waterproof", name: "Waterproof" },
-  { id: "eco-friendly", name: "Eco-Friendly" },
+  { id: "eco friendly", name: "Eco-Friendly" },
   { id: "premium", name: "Premium" },
   { id: "budget", name: "Budget-Friendly" },
   { id: "durable", name: "Durable" },
@@ -52,26 +64,26 @@ const PRODUCT_TAGS: OptionItem[] = [
 
 // Common device models for consistent reference
 const DEVICE_MODELS: OptionItem[] = [
-  { id: "iphone-15-pro-max", name: "iPhone 15 Pro Max" },
-  { id: "iphone-15-pro", name: "iPhone 15 Pro" },
-  { id: "iphone-15-plus", name: "iPhone 15 Plus" },
-  { id: "iphone-15", name: "iPhone 15" },
-  { id: "iphone-14-pro-max", name: "iPhone 14 Pro Max" },
-  { id: "iphone-14-pro", name: "iPhone 14 Pro" },
-  { id: "iphone-14-plus", name: "iPhone 14 Plus" },
-  { id: "iphone-14", name: "iPhone 14" },
-  { id: "iphone-13-pro-max", name: "iPhone 13 Pro Max" },
-  { id: "iphone-13-pro", name: "iPhone 13 Pro" },
-  { id: "iphone-13", name: "iPhone 13" },
-  { id: "samsung-s23-ultra", name: "Samsung Galaxy S23 Ultra" },
-  { id: "samsung-s23-plus", name: "Samsung Galaxy S23+" },
-  { id: "samsung-s23", name: "Samsung Galaxy S23" },
-  { id: "samsung-s22-ultra", name: "Samsung Galaxy S22 Ultra" },
-  { id: "pixel-8-pro", name: "Google Pixel 8 Pro" },
-  { id: "pixel-8", name: "Google Pixel 8" },
-  { id: "pixel-7-pro", name: "Google Pixel 7 Pro" },
-  { id: "apple-watch-series-9", name: "Apple Watch Series 9" },
-  { id: "apple-watch-ultra-2", name: "Apple Watch Ultra 2" },
+  { id: "iphone 15 pro max", name: "iPhone 15 Pro Max" },
+  { id: "iphone 15 pro", name: "iPhone 15 Pro" },
+  { id: "iphone 15 plus", name: "iPhone 15 Plus" },
+  { id: "iphone 15", name: "iPhone 15" },
+  { id: "iphone 14 pro max", name: "iPhone 14 Pro Max" },
+  { id: "iphone 14 pro", name: "iPhone 14 Pro" },
+  { id: "iphone 14 plus", name: "iPhone 14 Plus" },
+  { id: "iphone 14", name: "iPhone 14" },
+  { id: "iphone 13 pro max", name: "iPhone 13 Pro Max" },
+  { id: "iphone 13 pro", name: "iPhone 13 Pro" },
+  { id: "iphone 13", name: "iPhone 13" },
+  { id: "samsung s23 ultra", name: "Samsung Galaxy S23 Ultra" },
+  { id: "samsung s23 plus", name: "Samsung Galaxy S23+" },
+  { id: "samsung s23", name: "Samsung Galaxy S23" },
+  { id: "samsung s22 ultra", name: "Samsung Galaxy S22 Ultra" },
+  { id: "pixel 8 pro", name: "Google Pixel 8 Pro" },
+  { id: "pixel 8", name: "Google Pixel 8" },
+  { id: "pixel 7 pro", name: "Google Pixel 7 Pro" },
+  { id: "apple watch series 9", name: "Apple Watch Series 9" },
+  { id: "apple watch ultra 2", name: "Apple Watch Ultra 2" },
 ];
 
 // Common materials for accessories
@@ -85,7 +97,7 @@ const MATERIAL_OPTIONS: OptionItem[] = [
   { id: "fabric", name: "Fabric" },
   { id: "wood", name: "Wood" },
   { id: "biodegradable", name: "Biodegradable" },
-  { id: "carbon-fiber", name: "Carbon Fiber" },
+  { id: "carbon fiber", name: "Carbon Fiber" },
 ];
 
 // Accessory type options for consistency

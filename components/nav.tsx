@@ -4,6 +4,7 @@ import { useSession } from "next-auth/react";
 import Link from "next/link";
 import { Search } from "./search";
 import Cart from "./cartComponent";
+import SideBar from "./sidebar";
 import { motion, AnimatePresence } from "framer-motion";
 import { useState, useEffect, useRef } from "react";
 import { usePathname } from "next/navigation";
@@ -14,6 +15,7 @@ export const Nav = () => {
   const isAdmin = role === "admin";
   const pathname = usePathname();
   const [isOpen, setIsOpen] = useState(false);
+  const [isProfileDropdownOpen, setIsProfileDropdownOpen] = useState(false); // State for mobile profile dropdown
 
   // Reference to the nav container for detecting clicks outside
   const navRef = useRef<HTMLDivElement>(null);
@@ -21,6 +23,7 @@ export const Nav = () => {
   // Close menu when path changes
   useEffect(() => {
     setIsOpen(false);
+    setIsProfileDropdownOpen(false); // Also close profile dropdown on navigation
   }, [pathname]);
 
   // Close menu when clicking outside
@@ -32,6 +35,7 @@ export const Nav = () => {
         isOpen
       ) {
         setIsOpen(false);
+        setIsProfileDropdownOpen(false); // Close profile dropdown when main menu closes
       }
     };
 
@@ -40,6 +44,11 @@ export const Nav = () => {
       document.removeEventListener("mousedown", handleClickOutside);
     };
   }, [isOpen]);
+
+  // Toggle mobile profile dropdown
+  const toggleProfileDropdown = () => {
+    setIsProfileDropdownOpen(!isProfileDropdownOpen);
+  };
 
   // Navigation items
   const components = [
@@ -339,15 +348,27 @@ export const Nav = () => {
                   </motion.div>
                 )}
 
-                {/* Profile/Sign In Link */}
-                <motion.div variants={mobileItemVariants} className="py-2">
-                  <Link
-                    href={session ? "/profile" : "/auth/signin"}
-                    className="block px-4 py-2 hover:bg-black/5 rounded-md transition-colors"
-                  >
-                    {session ? "Profile" : "Sign In"}
-                  </Link>
-                </motion.div>
+                {/* Profile/Sign In Link - Updated for mobile with dropdown */}
+                {session ? (
+                  // Show profile dropdown for authenticated users
+                  <motion.div variants={mobileItemVariants} className="py-2">
+                    <SideBar
+                      isMobile={true}
+                      isDropdownOpen={isProfileDropdownOpen}
+                      onToggleDropdown={toggleProfileDropdown}
+                    />
+                  </motion.div>
+                ) : (
+                  // Show sign-in link for unauthenticated users
+                  <motion.div variants={mobileItemVariants} className="py-2">
+                    <Link
+                      href="/auth/signin"
+                      className="block px-4 py-2 hover:bg-black/5 rounded-md transition-colors"
+                    >
+                      <span className="font-medium">Sign In</span>
+                    </Link>
+                  </motion.div>
+                )}
               </motion.div>
             </motion.nav>
           )}

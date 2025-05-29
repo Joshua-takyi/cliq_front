@@ -44,10 +44,10 @@ export const DynamicList = ({
     }
   };
 
-  // Handle adding a selected item from dropdown
+  // Handle adding a selected item from dropdown - stores ID but shows name
   const handleAddSelectedItem = () => {
     if (selectedOption) {
-      onAddItem(selectedOption); // This now passes the ID instead of the name
+      onAddItem(selectedOption); // Pass the ID value to maintain data consistency
       setSelectedOption("");
     }
   };
@@ -86,9 +86,9 @@ export const DynamicList = ({
   };
 
   return (
-    <div className="space-y-5 p-4 bg-white border border-gray-100 rounded-lg shadow-sm">
+    <div className="space-y-5 p-4 bg-white border border-gray-100 rounded-none shadow-sm">
       <div className="flex items-center justify-between">
-        <p className="text-lg font-medium text-gray-800">{title}</p>
+        <p className="text-sm font-medium text-gray-800">{title}</p>
         {allowCustom && options.length > 0 && (
           <button
             type="button"
@@ -110,7 +110,7 @@ export const DynamicList = ({
             onChange={(e) => setNewItem(e.target.value)}
             onKeyPress={handleKeyPress}
             placeholder={placeholder}
-            className="flex-grow p-3 border border-gray-200 rounded-lg"
+            className="flex-grow p-3 border border-gray-200 rounded-none text-sm"
             aria-label={`Add ${title}`}
           />
         ) : (
@@ -118,12 +118,12 @@ export const DynamicList = ({
             <select
               value={selectedOption}
               onChange={(e) => setSelectedOption(e.target.value)}
-              className="w-full p-3 border border-gray-200 rounded-lg appearance-none"
+              className="w-full p-3 border border-gray-200 rounded-none appearance-none text-sm"
               aria-label={`Select ${title}`}
             >
               <option value="">Select {title.toLowerCase()}...</option>
               {options.map((option) => (
-                // Modified to store ID as value, not the name
+                // Display name but pass ID as value for consistent data handling
                 <option key={option.id} value={option.id}>
                   {option.name}
                 </option>
@@ -137,7 +137,7 @@ export const DynamicList = ({
         <button
           type="button"
           onClick={handleAddItem}
-          className="p-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center"
+          className="p-3 bg-blue-600 text-white rounded-none hover:bg-blue-700 transition-colors flex items-center"
           disabled={
             (inputMode === "text" && !newItem.trim()) ||
             (inputMode === "select" && !selectedOption)
@@ -152,16 +152,16 @@ export const DynamicList = ({
           {items.map((item, index) => (
             <div
               key={index}
-              className="flex items-center gap-2 bg-blue-50 text-blue-600 px-4 py-2 rounded-lg border border-blue-100"
+              className="flex items-center gap-2 bg-blue-50 text-blue-600 px-4 py-2 rounded-none border border-blue-100"
             >
-              {/* Display the friendly name if options are available, otherwise just show the ID */}
+              {/* Display the friendly name if options are available, otherwise show the stored value */}
               <span className="text-sm font-medium">
                 {getDisplayName(item)}
               </span>
               <button
                 type="button"
                 onClick={() => onDeleteItem(index)}
-                className="hover:bg-blue-100 rounded-full p-1"
+                className="hover:bg-blue-100 rounded-none p-1"
                 aria-label={`Remove ${getDisplayName(item)}`}
               >
                 <X size={16} />

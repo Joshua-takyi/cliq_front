@@ -88,19 +88,48 @@ const customStyles = `
     z-index: 2; /* Bring hovered item to front */
   }
   
-  
-  /* Custom styling for images in the carousel */
+   /* Custom styling for images in the carousel - Reduced height for shorter cards */
   .category-card img {
-    max-height: 90px;
+    max-height: 60px; /* Reduced from 90px for shorter cards */
     transition: transform 0.3s ease;
     object-fit: contain;
+    width: auto; /* Maintain aspect ratio */
   }
-  
-  /* Create uniformity in card heights for the grid layout */
+
+  /* Create uniformity in card heights for the grid layout - Optimized for shorter cards */
   .category-card {
     height: 100%;
     display: flex;
     flex-direction: column;
+    min-height: 120px; /* Set minimum height for consistency across devices */
+  }
+
+  /* Responsive image sizing for different devices */
+  @media (max-width: 1024px) {
+    .category-card img {
+      max-height: 50px; /* Further reduce on tablets */
+    }
+    .category-card {
+      min-height: 110px; /* Adjust card height for tablets */
+    }
+  }
+
+  @media (max-width: 768px) {
+    .category-card img {
+      max-height: 45px; /* Smaller images on mobile */
+    }
+    .category-card {
+      min-height: 100px; /* Compact height for mobile */
+    }
+  }
+
+  @media (max-width: 480px) {
+    .category-card img {
+      max-height: 40px; /* Even smaller for very small screens */
+    }
+    .category-card {
+      min-height: 90px; /* Very compact for small screens */
+    }
   }
   
   /* Hide default slick arrows completely */
@@ -170,6 +199,27 @@ const customStyles = `
       background-color: white;
     }
   }
+
+  /* Additional responsive optimizations for card spacing and sizing */
+  @media (max-width: 640px) {
+    .category-card-container {
+      margin: 0; /* Remove any residual margins on small screens */
+    }
+    
+    .carousel-wrapper {
+      padding: 0 4px; /* Minimal padding for very small screens */
+    }
+  }
+
+  /* Optimize for ultra-wide screens */
+  @media (min-width: 1921px) {
+    .category-card img {
+      max-height: 70px; /* Slightly larger images on very large screens */
+    }
+    .category-card {
+      min-height: 140px; /* Slightly taller cards on large screens */
+    }
+  }
 `;
 
 const carouselStyles: { [key: string]: CSSProperties } = {
@@ -181,21 +231,22 @@ const carouselStyles: { [key: string]: CSSProperties } = {
   carouselContainer: {
     position: "relative",
     padding: "0", // No padding for true grid look
-    marginBottom: "40px", // Space for dots below
+    marginBottom: "30px", // Reduced space for dots below (was 40px)
   },
   categoryTitle: {
     whiteSpace: "nowrap",
     overflow: "hidden",
     textOverflow: "ellipsis",
-    fontSize: "0.9rem",
+    fontSize: "0.85rem", // Slightly smaller font for more compact design
     fontWeight: 500, // Medium weight for better readability
-    padding: "12px 0",
+    padding: "8px 0", // Reduced padding for shorter cards (was 12px)
   },
   categoryImage: {
-    height: "110px",
-    width: "110px",
+    height: "60px", // Reduced height for more compact design (was 110px)
+    width: "auto", // Auto width to maintain aspect ratio
     objectFit: "contain",
     padding: "0",
+    maxWidth: "80px", // Set maximum width to prevent oversized images
   },
 };
 
@@ -304,16 +355,16 @@ const Categories = () => {
     infinite: false,
     speed: 400,
     slidesToShow: 5, // 5 items per row on large screens
-    slidesToScroll: 5, // Scroll full rows at a time for grid-like behavior
+    slidesToScroll: 3, // More efficient scrolling for shorter cards
     cssEase: "cubic-bezier(0.4, 0, 0.2, 1)", // Material design easing for smoother transitions
     arrows: true, // Show arrows by default
     initialSlide: 0,
     swipeToSlide: true, // Enable swipe for better mobile interaction
     prevArrow: <PrevArrow />, // Custom prev arrow
     nextArrow: <NextArrow />, // Custom next arrow
-    // Removed afterChange callback as activeSlide is no longer used
     centerMode: false, // Ensure cards are aligned to the left
     centerPadding: "0px", // No extra padding
+    adaptiveHeight: false, // Keep consistent height across all slides
     responsive: [
       {
         breakpoint: 1600,
@@ -323,7 +374,6 @@ const Categories = () => {
           arrows: true,
         },
       },
-
       {
         breakpoint: 1280,
         settings: {
@@ -352,7 +402,7 @@ const Categories = () => {
         breakpoint: 640,
         settings: {
           slidesToShow: 2, // Consistently show 2 items on small screens
-          slidesToScroll: 2, // Scroll 2 at a time
+          slidesToScroll: 1, // Single scroll for better control with shorter cards
           arrows: true, // Ensure arrows are always visible
           centerMode: false,
           centerPadding: "0px",

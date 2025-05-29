@@ -1,12 +1,13 @@
 "use client";
 
 import { useSearchParams } from "next/navigation";
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 import { useProduct } from "@/hooks/useProduct";
 import ProductCard from "@/components/productCard";
 import { ProductProps } from "@/types/product_types";
-import FilterPanel from "@/components/FilterPanel";
-import { Filter } from "lucide-react";
+import ProductFilter from "@/components/ProductFilter";
+import { Filter, X } from "lucide-react";
 import Loader from "@/app/loading";
 
 export default function SearchPage() {
@@ -110,14 +111,16 @@ export default function SearchPage() {
           )}
         </div>
 
-        {/* Filter button */}
-        <button
+        {/* Filter button with enhanced hover animations */}
+        <motion.button
           onClick={toggleFilter}
-          className="flex items-center space-x-1 px-3 py-1.5 border border-gray-300 rounded-md hover:bg-gray-50"
+          className="flex items-center space-x-1 px-3 py-1.5 border border-gray-300 rounded-md hover:bg-gray-50 transition-all duration-200"
+          whileHover={{ scale: 1.05 }}
+          whileTap={{ scale: 0.95 }}
         >
           <Filter size={16} />
           <span>Filter</span>
-        </button>
+        </motion.button>
       </div>
 
       {/* Pass a fallback slug if query is null */}
@@ -183,11 +186,63 @@ export default function SearchPage() {
         </div>
       )}
 
-      {/* Filter Panel */}
-      <FilterPanel
-        isOpen={isFilterOpen}
-        onClose={() => setIsFilterOpen(false)}
-      />
+      {/* Mobile Filter Overlay - Clean framer-motion animations */}
+      <AnimatePresence>
+        {isFilterOpen && (
+          <div className="fixed inset-0 z-50 lg:hidden">
+            {/* Backdrop with beautiful blur effect and smooth fade-in animation */}
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{
+                duration: 0.3,
+                ease: [0.22, 1, 0.36, 1], // Smooth cubic-bezier easing like cart
+              }}
+              className="fixed inset-0 bg-black/20 backdrop-blur-md"
+              onClick={() => setIsFilterOpen(false)}
+            />
+
+            {/* Filter Panel with smooth slide-in animation from right */}
+            <motion.div
+              initial={{ opacity: 0, x: "100%" }}
+              animate={{ opacity: 1, x: "0%" }}
+              exit={{ opacity: 0, x: "100%" }}
+              transition={{
+                duration: 0.5,
+                ease: [0.22, 1, 0.36, 1], // Custom cubic-bezier for smoother animation
+              }}
+              className="fixed right-0 top-0 h-full w-80 bg-white shadow-2xl overflow-y-auto"
+            >
+              {/* Close button header with modern design */}
+              <div className="flex items-center justify-between p-4 border-b border-gray-100 bg-white/95 backdrop-blur-sm sticky top-0 z-10">
+                <h2 className="text-lg font-semibold text-gray-900">Filters</h2>
+                <motion.button
+                  onClick={() => setIsFilterOpen(false)}
+                  className="p-2 hover:bg-gray-100 rounded-full transition-all duration-200 ease-out"
+                  whileHover={{ scale: 1.1, rotate: 90 }}
+                  whileTap={{ scale: 0.95 }}
+                >
+                  <X className="h-5 w-5 text-gray-600" />
+                </motion.button>
+              </div>
+
+              {/* Filter component with content fade-in */}
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{
+                  duration: 0.4,
+                  delay: 0.2,
+                  ease: [0.22, 1, 0.36, 1],
+                }}
+              >
+                <ProductFilter />
+              </motion.div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }

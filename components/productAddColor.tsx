@@ -56,11 +56,11 @@ export const FormColors = ({
   return (
     <div className="space-y-4">
       <div className="flex justify-between items-center">
-        <h3 className="text-xl font-semibold text-gray-800">Product Colors</h3>
+        <h3 className="text-sm font-semibold text-gray-800">Product Colors</h3>
         <Button
           type="button"
           onClick={openModal}
-          className="flex items-center gap-2 px-4 py-2 bg-blue-50 text-blue-600 rounded-lg hover:bg-blue-100 transition-colors"
+          className="flex items-center gap-2 px-4 py-2 bg-blue-50 text-blue-600 rounded-none hover:bg-blue-100 transition-colors text-sm"
         >
           <Plus size={16} />
           <span>Add Custom Color</span>
@@ -70,13 +70,13 @@ export const FormColors = ({
       {error && <p className="text-red-500 text-sm">{error}</p>}
 
       <div className="grid grid-cols-2 sm:grid-cols-5 gap-4">
-        {/* Predefined color options */}
+        {/* Predefined color options for phone accessories - covers popular color preferences */}
         {ColorData.map((color) => (
           <button
             key={color.value}
             type="button"
             onClick={() => onAddColor(color.value)}
-            className="flex flex-col items-center space-y-2 p-3 rounded-lg hover:bg-gray-50 transition-colors"
+            className="flex flex-col items-center space-y-2 p-3 rounded-none hover:bg-gray-50 transition-colors"
           >
             <div
               className="w-10 h-10 rounded-full border border-gray-200"
@@ -104,7 +104,7 @@ export const FormColors = ({
                 <Button
                   type="button"
                   onClick={() => onDeleteColor(color)}
-                  className="absolute -top-2 -right-2 bg-white rounded-full w-5 h-5 flex items-center justify-center text-red-500 border border-gray-200 opacity-0 group-hover:opacity-100 transition-opacity"
+                  className="absolute -top-2 -right-2 bg-white rounded-none w-5 h-5 flex items-center justify-center text-red-500 border border-gray-200 opacity-0 group-hover:opacity-100 transition-opacity text-sm"
                   aria-label={`Remove ${color}`}
                 >
                   &times;
@@ -126,19 +126,19 @@ export const FormColors = ({
               Enter a valid hex color code (e.g., #FF0000).
             </p>
 
-            {/* Color Preview */}
+            {/* Color Preview for visual feedback before adding */}
             <div
-              className="w-full h-20 rounded-lg border border-gray-200"
+              className="w-full h-20 rounded-none border border-gray-200"
               style={{ backgroundColor: customColor || "#FFFFFF" }}
             />
 
-            {/* Custom Color Input */}
+            {/* Custom Color Input with hex validation */}
             <input
               type="text"
               value={customColor}
               onChange={(e) => setCustomColor(e.target.value)}
               placeholder="#000000"
-              className="w-full p-3 border border-gray-200 rounded-lg"
+              className="w-full p-3 border border-gray-200 rounded-none text-sm"
             />
 
             {colorError && <p className="text-red-500 text-sm">{colorError}</p>}
@@ -147,14 +147,14 @@ export const FormColors = ({
               <Button
                 type="button"
                 onClick={closeModal}
-                className="px-4 py-2 border border-gray-300 rounded-md shadow-sm "
+                className="px-4 py-2 border border-gray-300 rounded-none shadow-sm text-sm"
               >
                 Cancel
               </Button>
               <Button
                 type="button"
                 onClick={addCustomColor}
-                className="px-4 py-2 border border-transparent rounded-md shadow-sm text-white "
+                className="px-4 py-2 border border-transparent rounded-none shadow-sm text-white text-sm"
               >
                 Add Color
               </Button>

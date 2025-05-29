@@ -33,17 +33,17 @@ export const FormInput = ({
       <input
         type={type}
         name={name}
-        value={value ?? ""} // If value is null, use an empty string instead
+        value={value ?? ""} // Handle null values gracefully by converting to empty string for controlled input
         onChange={onChange}
         className={`w-full p-3 border ${
           error ? "border-red-500" : "border-gray-200"
-        } rounded-lg outline-hidden transition-all`}
+        } rounded-none outline-hidden transition-all text-sm`}
         placeholder={placeholder}
         required={required}
         aria-invalid={!!error}
         aria-describedby={error ? `${name}-error` : undefined}
-        step={step} // Add step attribute
-        min={min} // Add min attribute
+        step={step} // Support decimal inputs for prices
+        min={min} // Support minimum value constraints
       />
       {error && (
         <p id={`${name}-error`} className="text-red-500 text-sm">

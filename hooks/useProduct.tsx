@@ -3,7 +3,6 @@ import axios from "axios";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { ApiResponse, ProductProps } from "../types/product_types";
 import { useSession } from "next-auth/react";
-import { resolve } from "path";
 
 // Define a custom hook for product-related operations
 export const useProduct = () => {
@@ -254,6 +253,12 @@ export const useProduct = () => {
         if (filters.models) params.append("models", filters.models);
         if (filters.colors) params.append("colors", filters.colors);
         if (filters.materials) params.append("materials", filters.materials);
+
+        // Add phone accessory-specific filters for enhanced filtering experience
+        if (filters.brands) params.append("brands", filters.brands);
+        if (filters.compatibility)
+          params.append("compatibility", filters.compatibility);
+
         if (filters.sortBy) {
           params.append("sort_by", filters.sortBy);
           if (filters.sortDir) params.append("sort_dir", filters.sortDir);
@@ -289,6 +294,27 @@ export const useProduct = () => {
         if (filters.is_best_seller !== undefined)
           // Support for snake_case version
           params.append("is_best_seller", String(filters.is_best_seller));
+
+        // Add phone accessory-specific boolean filters for technical features
+        if (filters.isWireless !== undefined)
+          params.append("is_wireless", String(filters.isWireless));
+        if (filters.is_wireless !== undefined)
+          params.append("is_wireless", String(filters.is_wireless));
+
+        if (filters.isFastCharging !== undefined)
+          params.append("is_fast_charging", String(filters.isFastCharging));
+        if (filters.is_fast_charging !== undefined)
+          params.append("is_fast_charging", String(filters.is_fast_charging));
+
+        if (filters.isMagSafe !== undefined)
+          params.append("is_magsafe", String(filters.isMagSafe));
+        if (filters.is_magsafe !== undefined)
+          params.append("is_magsafe", String(filters.is_magsafe));
+
+        if (filters.isWaterproof !== undefined)
+          params.append("is_waterproof", String(filters.isWaterproof));
+        if (filters.is_waterproof !== undefined)
+          params.append("is_waterproof", String(filters.is_waterproof));
 
         const res = await axios.get(
           `${API_URL}/filter_products?${params.toString()}`

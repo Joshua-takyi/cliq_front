@@ -2,8 +2,6 @@
 
 import { useProfile } from "@/hooks/useProfile";
 import { useEffect } from "react";
-import { User, Phone, Mail, MapPin, Home, Navigation } from "lucide-react";
-import { CheckoutFormData } from "@/types/product_types";
 import Loader from "@/app/loading";
 
 export default function PersonalInfoComponent() {
@@ -20,125 +18,86 @@ export default function PersonalInfoComponent() {
 
   if (!data || data?.length === 0) {
     return (
-      <div className="p-6 bg-transparent">
-        <h1 className="text-2xl font-bold mb-4">Personal Information</h1>
-        <div className="flex items-center justify-center h-40 border-2 border-dashed border-gray-300">
-          <p className="text-gray-500">
-            No personal information found. Please add your details.
-          </p>
+      <div className="bg-transparent">
+        <div className="py-6 border-b border-gray-200">
+          <h1 className="text-2xl font-medium text-gray-800">Welcome, User</h1>
+        </div>
+        <div className="mt-6">
+          <div className="bg-gray-50 p-4">
+            <h2 className="font-medium text-gray-800">Personal Information</h2>
+          </div>
+          <div className="p-6">
+            <div className="flex items-center justify-center h-32 border-2 border-dashed border-gray-300 rounded-lg">
+              <p className="text-gray-500 text-center px-4 text-sm">
+                No personal information found. Please add your details.
+              </p>
+            </div>
+          </div>
         </div>
       </div>
     );
   }
+
   return (
-    <section className="p-6 bg-transparent">
-      <h1 className="text-2xl font-bold mb-6">Personal Information</h1>
-      <InfoCard userData={data} />
+    <section className="bg-transparent">
+      {/* Welcome header with user name - like in reference image */}
+      <div className="py-6 border-b border-gray-200">
+        <div className="flex justify-between items-center">
+          <h1 className="text-2xl font-medium text-gray-800">
+            Welcome, {data?.firstname || "User"}
+          </h1>
+          <button className="text-sm text-gray-700 hover:underline">
+            Delete Account
+          </button>
+        </div>
+      </div>
+
+      {/* Personal information section - styled like the reference */}
+      <div className="mt-6">
+        {/* Section header with actions */}
+        <div className="bg-gray-50 p-4 flex justify-between items-center">
+          <h2 className="font-medium text-gray-800">Personal Information</h2>
+          <div className="space-x-4">
+            <button className="text-sm text-gray-700 hover:underline">
+              Change Password
+            </button>
+            <button className="text-sm text-gray-700 hover:underline">
+              Edit
+            </button>
+          </div>
+        </div>
+
+        {/* User details - similar to reference image layout */}
+        <div className="p-6 space-y-4">
+          <div>
+            <p className="text-sm text-gray-500 mb-1">Name:</p>
+            <p className="text-gray-800">
+              {data?.firstname} {data?.lastname}
+            </p>
+          </div>
+
+          <div>
+            <p className="text-sm text-gray-500 mb-1">Contact:</p>
+            <p className="text-gray-800">
+              {data?.email || "No email provided"}
+            </p>
+          </div>
+
+          <div>
+            <p className="text-sm text-gray-500 mb-1">Phone Number:</p>
+            <p className="text-gray-800">
+              {data?.phoneNumber || "No phone number provided"}
+            </p>
+          </div>
+
+          <div>
+            <p className="text-sm text-gray-500 mb-1">Birthday Date:</p>
+            <p className="text-gray-800">
+              {data?.dateOfBirth || "Not provided"}
+            </p>
+          </div>
+        </div>
+      </div>
     </section>
   );
 }
-
-// InfoCard component to display user information in a clean, transparent layout
-interface InfoCardProps {
-  userData: CheckoutFormData;
-}
-
-const InfoCard: React.FC<InfoCardProps> = ({ userData }) => {
-  // Destructure the user data for easier access
-  const { name, email, phone, region, city, street, ghana_post, deliver_to } =
-    userData;
-
-  return (
-    <div className="flex flex-col gap-6">
-      {/* Personal Information Section */}
-      <div className="p-6 bg-transparent border-b border-gray-200">
-        <h2 className="text-lg font-semibold mb-4 flex items-center">
-          <User className="mr-2 h-5 w-5 text-gray-700" />
-          Personal Details
-        </h2>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          {/* Name */}
-          <div className="flex flex-col">
-            <span className="text-sm text-gray-500">Name</span>
-            <span className="font-medium">{name || "Not provided"}</span>
-          </div>
-
-          {/* Email */}
-          <div className="flex flex-col">
-            <div className="flex items-center text-sm text-gray-500">
-              <Mail className="mr-1 h-4 w-4" />
-              <span>Email</span>
-            </div>
-            <span className="font-medium">{email || "Not provided"}</span>
-          </div>
-
-          {/* Phone */}
-          <div className="flex flex-col">
-            <div className="flex items-center text-sm text-gray-500">
-              <Phone className="mr-1 h-4 w-4" />
-              <span>Phone</span>
-            </div>
-            <span className="font-medium">{phone || "Not provided"}</span>
-          </div>
-        </div>
-      </div>
-
-      {/* Address Information Section */}
-      <div className="p-6 bg-transparent">
-        <h2 className="text-lg font-semibold mb-4 flex items-center">
-          <Home className="mr-2 h-5 w-5 text-gray-700" />
-          Address Information
-        </h2>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          {/* Region */}
-          {region && (
-            <div className="flex flex-col">
-              <div className="flex items-center text-sm text-gray-500">
-                <MapPin className="mr-1 h-4 w-4" />
-                <span>Region</span>
-              </div>
-              <span className="font-medium">{region}</span>
-            </div>
-          )}
-
-          {/* City */}
-          {city && (
-            <div className="flex flex-col">
-              <span className="text-sm text-gray-500">City</span>
-              <span className="font-medium">{city}</span>
-            </div>
-          )}
-
-          {/* Street */}
-          {street && (
-            <div className="flex flex-col">
-              <span className="text-sm text-gray-500">Street</span>
-              <span className="font-medium">{street}</span>
-            </div>
-          )}
-
-          {/* Ghana Post */}
-          {ghana_post && (
-            <div className="flex flex-col">
-              <span className="text-sm text-gray-500">Ghana Post</span>
-              <span className="font-medium">{ghana_post}</span>
-            </div>
-          )}
-
-          {/* Delivery Instructions */}
-          {deliver_to && (
-            <div className="flex flex-col col-span-1 md:col-span-2">
-              <div className="flex items-center text-sm text-gray-500">
-                <Navigation className="mr-1 h-4 w-4" />
-                <span>Delivery Instructions</span>
-              </div>
-              <span className="font-medium">{deliver_to}</span>
-            </div>
-          )}
-        </div>
-      </div>
-    </div>
-  );
-};

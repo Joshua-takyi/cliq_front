@@ -160,7 +160,8 @@ export default function CheckoutPage() {
         notes: (formData as any).orderNotes || "",
       },
       cartItems: cartData.items.map((item) => ({
-        id: item.product_Id,
+        id: item.product_id,
+        image: item.image,
         slug: item.slug,
         title: item.title,
         quantity: item.quantity,

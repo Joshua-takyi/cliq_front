@@ -3,9 +3,7 @@
 import Loader from "@/app/loading";
 import { useProduct } from "@/hooks/useProduct";
 import { ProductProps } from "@/types/product_types";
-import { Filter } from "lucide-react";
 import { useSearchParams } from "next/navigation";
-import { useState } from "react";
 import ProductCard from "./productCard";
 
 export default function Grid() {
@@ -14,7 +12,6 @@ export default function Grid() {
   const limit = parseInt(searchParams.get("limit") || "12");
 
   // State for filter panel visibility
-  const [isFilterOpen, setIsFilterOpen] = useState(false);
 
   // Extract filter parameters from URL
   const category = searchParams.get("category");
@@ -28,8 +25,6 @@ export default function Grid() {
   // Get filter products function from custom hook
   const { filterProducts } = useProduct();
 
-  // Build filter parameters object - always use filtering regardless of whether parameters are provided
-  // This ensures we always use the filter endpoint even for no-filter scenarios
   const filterParams = {
     category: category || undefined,
     minPrice: minPrice ? parseFloat(minPrice) : undefined,
@@ -46,17 +41,11 @@ export default function Grid() {
   // Get product array from response data structure
   const products = data?.data?.products || data?.products || [];
 
-  // Toggle filter panel visibility
-  const toggleFilter = () => {
-    setIsFilterOpen(!isFilterOpen);
-  };
-
   // Handle loading state
   if (isLoading) {
     return <Loader />;
   }
 
-  // Only check for empty products after loading is complete
   if (products.length === 0) {
     return (
       <div className="flex justify-center items-center h-64">
@@ -74,17 +63,8 @@ export default function Grid() {
 
   return (
     <div>
-      {/* Filter button */}
-      <button
-        onClick={toggleFilter}
-        className="flex items-center space-x-1 px-3 py-1.5 border border-gray-300 rounded-md hover:bg-gray-50"
-      >
-        <Filter size={16} />
-        <span>Filter</span>
-      </button>
-
       {/* Products grid */}
-      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 px-1 gap-2  lg:px-0">
+      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 px-1 gap-2  lg:px-0">
         {products?.map((product: ProductProps) => (
           <ProductCard
             key={product.id} // Use the unique product ID as the key

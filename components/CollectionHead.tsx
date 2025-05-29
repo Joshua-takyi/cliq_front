@@ -23,7 +23,7 @@ const CollectionHeader = ({ params }: SlugPageProps) => {
   return (
     <main className="">
       <div className="flex justify-center">
-        <div className="lg:p-4 py-10 px-2 lg:w-[470px] lg:h-[270px] flex flex-col justify-center gap-2">
+        <div className="lg:p-4 py-10 px-2 lg:w-[470px] lg:h-[210px] flex flex-col justify-center gap-2">
           <h1 className="text-xl uppercase text-pretty w-full text-center">
             {header?.header}
           </h1>

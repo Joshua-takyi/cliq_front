@@ -45,9 +45,9 @@ export default function Footer() {
     },
   ];
   return (
-    <footer className="bg-[#111111] text-white">
+    <footer className="bg-[#111111] text-white lg:mt-20 mt-10">
       {/* Newsletter Section */}
-      <div className="bg-[#9BEC00] py-10">
+      {/* <div className="bg-[#9BEC00] py-10">
         <div className="max-w-[100rem] mx-auto px-4">
           <div className="flex flex-col md:flex-row items-center justify-between">
             <div className="mb-6 md:mb-0">
@@ -72,7 +72,7 @@ export default function Footer() {
             </div>
           </div>
         </div>
-      </div>
+      </div> */}
 
       {/* Main Footer */}
       <div className="max-w-[100rem] mx-auto px-4 py-16">

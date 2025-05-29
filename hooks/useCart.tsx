@@ -10,7 +10,7 @@ export interface CartProps {
   color: string;
   model: string;
   quantity: number;
-  product_Id: string;
+  product_id: string;
 }
 export const UseCart = () => {
   const queryClient = useQueryClient();

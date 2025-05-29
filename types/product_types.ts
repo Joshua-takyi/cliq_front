@@ -49,7 +49,7 @@ export interface CartData {
     image: string;
     total_price: number;
     quantity: number;
-    product_Id: string;
+    product_id: string;
   }[];
   total_amount: number;
 }

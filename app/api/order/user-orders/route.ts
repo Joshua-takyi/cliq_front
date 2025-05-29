@@ -55,7 +55,7 @@ export async function GET(request: Request) {
     // Return orders with pagination metadata
     return NextResponse.json(
       {
-        orders,
+        data: orders,
         pagination: {
           total: totalOrders,
           page,

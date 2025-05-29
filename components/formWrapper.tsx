@@ -37,11 +37,11 @@ export const FormWrapper = ({
   isSubmitting = false,
 }: FormWrapperProps) => {
   return (
-    <div className="bg-white rounded-lg shadow-md p-6 md:p-10 max-w-5xl mx-auto">
+    <div className="bg-white rounded-none shadow-md p-6 md:p-10 max-w-5xl mx-auto">
       <div className="mb-8">
-        <h1 className="text-3xl font-bold text-gray-900">{title}</h1>
+        <h1 className="text-2xl font-bold text-gray-900">{title}</h1>
         {description && (
-          <p className="mt-3 text-gray-600 text-lg">{description}</p>
+          <p className="mt-3 text-gray-600 text-sm">{description}</p>
         )}
       </div>
 
@@ -51,7 +51,7 @@ export const FormWrapper = ({
         <div className="flex justify-end gap-4">
           <Button
             type="button"
-            className="px-4 py-2 border border-gray-300 rounded-md shadow-sm text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+            className="px-4 py-2 border border-gray-300 rounded-none shadow-sm text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 text-sm"
             onClick={() => window.history.back()}
           >
             Cancel
@@ -60,7 +60,7 @@ export const FormWrapper = ({
           <Button
             type="submit"
             disabled={isSubmitting}
-            className={`px-4 py-2 border border-transparent rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 ${
+            className={`px-4 py-2 border border-transparent rounded-none shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 text-sm ${
               isSubmitting ? "opacity-70 cursor-not-allowed" : ""
             }`}
           >
