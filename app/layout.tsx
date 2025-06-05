@@ -41,7 +41,7 @@ export default function RootLayout({
         suppressHydrationWarning={true}
         className={`${geistSans.variable} ${geistMono.variable}  ${Rauschen.className} antialiased`}
       >
-        <Toaster richColors={true} position="top-right" />
+        <Toaster richColors={true} position="top-center" />
         <QueryProvider>
           <AuthProvider>
             <div className="flex min-h-screen flex-col">

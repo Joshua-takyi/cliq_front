@@ -1,7 +1,9 @@
 import { NextResponse } from "next/server";
 import crypto from "crypto";
+import { GenerateOrderConfirmationEmail, OrderProps } from "@/libs/email/templates/confirmOrder";
 import client from "@/libs/connect";
-
+import { ItemsProp } from "@/libs/email/templates/confirmOrder";
+import nodemailer from "nodemailer";
 // Simple function to generate order ID
 function generateOrderId(): string {
   return `ORD-${Date.now()}-${Math.random()
@@ -135,20 +137,89 @@ export async function POST(req: Request) {
         const result = await db.collection("orders").insertOne(order);
 
         if (result.acknowledged) {
+
+          //  DEBUGGING LOGS
           console.log(`Order created: ${order.orderId}`);
           console.log(`Customer: ${metadata.shippingInfo.name}`);
           console.log(`Amount: ${order.currency} ${order.amount}`);
 
           await client.close();
 
-          return NextResponse.json({
-            success: true,
-            orderId: result.insertedId,
-            orderNumber: order.orderId,
+
+
+          // SEND AN ORDER CONFIRMATION EMAIL
+          if (!order.orderId || !order.amount || !order.items || !order.shippingInfo || !order.shippingInfo.email) {
+            console.error("Missing required order details for email");
+            return NextResponse.json(
+              { success: false, message: "Missing order details for email" },
+              { status: 400 }
+            );
+          }
+
+          const formattedOrderDetails: OrderProps = {
+            orderId: order.orderId || "",
+            email: order.email,
             status: order.status,
-            deliveryStatus: order.deliveryStatus,
-            message: "Payment processed successfully",
+            deliveryStatus: order.deliveryStatus || "pending",
+            amount: order.amount,
+            currency: order.currency,
+            items: order.items.map((item: ItemsProp) => ({
+              id: item.id,
+              title: item.title,
+              slug: item.slug,
+              price: item.price,
+              quantity: item.quantity,
+              image: item.image,
+              color: item.color // Include color if it exists
+            })),
+            shippingInfo: {
+              name: order.shippingInfo.name || "",
+              email: order.shippingInfo.email || "",
+              phone: order.shippingInfo.phone || "",
+              region: order.shippingInfo.region || "",
+              street: order.shippingInfo.street || "",
+              city: order.shippingInfo.city || "",
+              ghana_post: order.shippingInfo.ghanaPostCode || "", // Fixed property name
+              notes: order.shippingInfo.note || "", // Fixed property name
+            },
+            createdAt: new Date(order.createdAt),
+            // Add the missing payment property
+            // TODO implemnt pay on delivery
+            payment: {
+              method: order.payment.method,
+              status: order.payment.status,
+              reference: order.payment.reference
+            }
+          };
+
+          if (!process.env.EMAIL_USER || !process.env.EMAIL_PASS) {
+            throw new Error("Email credentials are not set in environment variables");
+          }
+
+          // CREATE A TRANSPORTER FOR THE EMAIL
+          const transporter = nodemailer.createTransport({
+            service: "gmail",
+            auth: {
+              user: process.env.EMAIL_USER,
+              pass: process.env.EMAIL_PASS,
+            },
+            secure: true,
           });
+
+          const emailTemplate = GenerateOrderConfirmationEmail(formattedOrderDetails);
+
+
+
+          await transporter.sendMail({
+            from: process.env.EMAIL_USER,
+            to: order.shippingInfo.email,
+            subject: emailTemplate.subject,
+            html: emailTemplate.body,
+          })
+
+          return NextResponse.json({
+            message: "Order created and email sent successfully",
+          }, { status: 201 });
         } else {
           throw new Error("Failed to create order");
         }
@@ -177,62 +248,3 @@ export async function POST(req: Request) {
     );
   }
 }
-
-/* 
-DELIVERY STATUS FLOW (Production Ready):
-
-Order Status:
-- confirmed: Payment successful, order confirmed
-- processing: Order being prepared/packed
-- shipped: Order shipped to customer
-- delivered: Order delivered successfully
-- cancelled: Order cancelled
-
-Delivery Status:
-- pending: Waiting to be processed
-- preparing: Being packed/prepared
-- shipped: In transit to customer
-- out_for_delivery: Out for final delivery
-- delivered: Successfully delivered
-
-Usage Example for updating status:
-// Move order to processing
-await db.collection("orders").updateOne(
-  { orderId: "ORD-12345" },
-  { 
-    $set: { 
-      status: "processing",
-      deliveryStatus: "preparing",
-      updatedAt: new Date()
-    }
-  }
-);
-
-// Ship order
-await db.collection("orders").updateOne(
-  { orderId: "ORD-12345" },
-  { 
-    $set: { 
-      status: "shipped",
-      deliveryStatus: "shipped",
-      "delivery.trackingNumber": "TRK123456",
-      "delivery.carrier": "DHL",
-      "delivery.estimatedDate": new Date(Date.now() + 3 * 24 * 60 * 60 * 1000), // 3 days
-      updatedAt: new Date()
-    }
-  }
-);
-
-// Deliver order
-await db.collection("orders").updateOne(
-  { orderId: "ORD-12345" },
-  { 
-    $set: { 
-      status: "delivered",
-      deliveryStatus: "delivered",
-      "delivery.actualDate": new Date(),
-      updatedAt: new Date()
-    }
-  }
-);
-*/

@@ -1,0 +1,58 @@
+{
+  "_id": {
+    "$oid": "68350853a3a06611181297dd"
+  },
+  "orderId": "ORD-1748306003439-5TU2ZY",
+  "userId": {
+    "$oid": "6831ab3dd70fc9e49c6f4edd"
+  },
+  "email": "takyijoshua019@gmail.com",
+  "status": "confirmed",
+  "deliveryStatus": "pending",
+  "amount": 225.65,
+  "currency": "GHS",
+  "items": [
+    {
+      "id": "6825c6c92b1b95b0d5180b00",
+      "image": "https://res.cloudinary.com/dbx4xg7mu/image/upload/v1747305943/cliq/HRTP2_AV1_twugdo.png",
+      "slug": "crystalmag-ultra-clear-magsafe-iphone-case-show-off-your-iphone-s-origi-phone-cases",
+      "title": "Ultra‑Clear MagSafe iPhone Case",
+      "quantity": "1",
+      "price": "195.65",
+      "color": "#C0C0C0"
+    }
+  ],
+  "shippingInfo": {
+    "name": "joshua takyi",
+    "phone": "0504159861",
+    "email": "takyijoshua019@gmail.com",
+    "region": "Greater Accra",
+    "street": "127b splinter Rd",
+    "ghana_post": "GHA-1122-ZA",
+    "city": "Accra",
+    "notes": ""
+  },
+  "payment": {
+    "method": "mobile_money",
+    "status": "completed",
+    "provider": "paystack",
+    "reference": "ax3cfoaw7n",
+    "paystackId": 5002371031,
+    "paidAt": {
+      "$date": "2025-05-27T00:33:19.000Z"
+    }
+  },
+  "delivery": {
+    "estimatedDate": null,
+    "actualDate": null,
+    "trackingNumber": null,
+    "carrier": null,
+    "notes": []
+  },
+  "createdAt": {
+    "$date": "2025-05-27T00:33:23.439Z"
+  },
+  "updatedAt": {
+    "$date": "2025-05-27T00:33:23.439Z"
+  }
+}
