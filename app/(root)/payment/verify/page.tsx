@@ -11,23 +11,13 @@ import {
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 
-// Type definitions for better code organization
-type VerificationStatus = "idle" | "loading" | "success" | "error";
-
 interface VerificationData {
   orderId?: string;
   amount?: number;
   transactionDate?: string;
   paymentMethod?: string;
   customerName?: string;
-  customerEmail?: string;
   [key: string]: any;
-}
-
-interface VerificationState {
-  status: VerificationStatus;
-  message?: string;
-  data?: VerificationData;
 }
 
 export default function PaymentCompleted() {

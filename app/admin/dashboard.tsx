@@ -1,55 +1,26 @@
 "use client";
 
-import React from "react";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Progress } from "@/components/ui/progress";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
-import { useAdminProducts } from "@/hooks/useAdminProducts";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { GetOrdersByAdmin } from "@/hooks/adminOrder";
-import {
-  ShoppingBag,
-  Users,
-  DollarSign,
-  TrendingUp,
-  Package,
-  ShoppingCart,
-  Plus,
-} from "lucide-react";
-import Link from "next/link";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { useAdminProducts } from "@/hooks/useAdminProducts";
 import { formatCurrency } from "@/libs/email/templates/processingOrder";
+import { Package, ShoppingCart, DollarSign, Users } from "lucide-react";
+import Link from "next/link";
+import React from "react";
+import OrderComponent from "./orders/order";
+import { ProductsList } from "./products/product";
 
-/**
- * AdminDashboard component - Main dashboard page for ecommerce admin panel
- * Provides comprehensive overview of store performance including sales, orders, products, and customers
- * Built with shadcn components for consistent, accessible UI
- */
 const AdminDashboard = () => {
-  // Fetch products and orders data using custom hooks
-  const {
-    data: productsData,
-    isLoading: productsLoading,
-    error: productsError,
-  } = useAdminProducts(1, 10);
-  const {
-    data: ordersData,
-    isLoading: ordersLoading,
-    error: ordersError,
-  } = GetOrdersByAdmin();
+  const { data: productsData, isLoading: productsLoading } = useAdminProducts(
+    1,
+    10
+  );
+  const { data: ordersData, isLoading: ordersLoading } = GetOrdersByAdmin();
 
-  /**
-   * Calculate dashboard statistics from fetched data
-   * Provides real-time metrics for business performance monitoring
-   */
   const stats = React.useMemo(() => {
     if (!ordersData?.data || !productsData?.products) {
       return {
@@ -57,313 +28,287 @@ const AdminDashboard = () => {
         totalOrders: 0,
         totalProducts: 0,
         totalCustomers: 0,
+        pendingOrders: 0,
+        lowStockProducts: 0,
         recentOrders: [],
         topProducts: [],
+        revenueByStatus: {
+          pending: 0,
+          processing: 0,
+          shipped: 0,
+          delivered: 0,
+          cancelled: 0,
+        },
       };
     }
 
-    // Calculate total revenue from all orders
     const totalRevenue = ordersData.data.reduce(
       (sum, order) => sum + order.amount,
-      0,
+      0
     );
-
-    // Get unique customers count from orders
     const uniqueCustomers = new Set(
-      ordersData.data.map((order) => order.userId),
+      ordersData.data.map((order) => order.userId)
     ).size;
-
-    // Get recent orders (last 5) sorted by creation date
+    const pendingOrders = ordersData.data.filter(
+      (order) => order.deliveryStatus === "pending"
+    ).length;
+    const lowStockProducts = productsData.products.filter(
+      (product) => (product.stock || 0) < 10
+    ).length;
     const recentOrders = ordersData.data
       .sort(
         (a, b) =>
-          new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
+          new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
       )
-      .slice(0, 5);
+      .slice(0, 4);
+    const topProducts = productsData.products.slice(0, 4);
 
-    // Get top products (first 5 from the products list - in real scenario, this would be sorted by sales)
-    const topProducts = productsData.products.slice(0, 5);
+    const revenueByStatus = ordersData.data.reduce(
+      (acc, order) => {
+        acc[order.deliveryStatus] =
+          (acc[order.deliveryStatus] || 0) + order.amount;
+        return acc;
+      },
+      { pending: 0, processing: 0, shipped: 0, delivered: 0, cancelled: 0 }
+    );
 
     return {
       totalRevenue,
       totalOrders: ordersData.data.length,
       totalProducts: productsData.count || productsData.products.length,
       totalCustomers: uniqueCustomers,
+      pendingOrders,
+      lowStockProducts,
       recentOrders,
       topProducts,
+      revenueByStatus,
     };
   }, [ordersData, productsData]);
 
-  /**
-   * Render loading skeleton while data is being fetched
-   * Maintains layout structure during loading state
-   */
   if (productsLoading || ordersLoading) {
     return (
-      <div className="min-h-screen bg-gray-50/50 p-6">
-        <div className="mx-auto max-w-7xl space-y-6">
-          <div className="space-y-2">
-            <Skeleton className="h-8 w-64" />
-            <Skeleton className="h-4 w-96" />
-          </div>
-
-          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
-            {Array.from({ length: 4 }).map((_, i) => (
-              <Card key={i}>
-                <CardHeader className="pb-2">
-                  <Skeleton className="h-4 w-24" />
-                  <Skeleton className="h-8 w-16" />
-                </CardHeader>
-              </Card>
-            ))}
-          </div>
-
-          <div className="grid gap-6 md:grid-cols-2">
-            <Card>
-              <CardHeader>
-                <Skeleton className="h-6 w-32" />
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-4">
-                  {Array.from({ length: 5 }).map((_, i) => (
-                    <Skeleton key={i} className="h-12 w-full" />
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader>
-                <Skeleton className="h-6 w-32" />
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-4">
-                  {Array.from({ length: 5 }).map((_, i) => (
-                    <Skeleton key={i} className="h-16 w-full" />
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
-          </div>
+      <div className="p-6 sm:p-8">
+        <Skeleton className="h-8 w-56 mb-6" />
+        <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+          {Array.from({ length: 4 }).map((_, i) => (
+            <Skeleton key={i} className="h-32 w-full rounded-lg" />
+          ))}
         </div>
-      </div>
-    );
-  }
-
-  /**
-   * Handle error states with user-friendly error messages
-   * Provides actionable feedback when data fetching fails
-   */
-  if (productsError || ordersError) {
-    return (
-      <div className="min-h-screen bg-gray-50/50 p-6">
-        <div className="mx-auto max-w-7xl">
-          <Card className="border-red-200 bg-red-50">
-            <CardHeader>
-              <CardTitle className="text-red-800">
-                Error Loading Dashboard
-              </CardTitle>
-              <CardDescription className="text-red-600">
-                {productsError?.message ||
-                  ordersError?.message ||
-                  "Unable to load dashboard data. Please try again later."}
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <Button
-                onClick={() => window.location.reload()}
-                variant="outline"
-                className="border-red-300 text-red-700 hover:bg-red-100"
-              >
-                Retry Loading Dashboard
-              </Button>
-            </CardContent>
-          </Card>
+        <div className="grid gap-6 sm:grid-cols-2 mt-6">
+          <Skeleton className="h-80 w-full rounded-lg" />
+          <Skeleton className="h-80 w-full rounded-lg" />
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gray-50/50">
-      {/* Header Section with welcome message and key actions */}
+    <div className="lg:p-6 p-3 sm:p-8 bg-gray-100">
+      <div className="max-w-7xl mx-auto space-y-8">
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+          <div>
+            <h1 className="text-xl font-semibold text-gray-900">
+              Admin Dashboard
+            </h1>
+            <p className="text-sm text-gray-600 mt-1">
+              Your store's performance at a glance
+            </p>
+          </div>
+          <div className="flex gap-3">
+            <Link href="/admin/orders">
+              <Button className="text-sm px-4 py-2 bg-blue-600 hover:bg-blue-700">
+                Manage Orders
+              </Button>
+            </Link>
+            <Link href="/admin/products/create">
+              <Button
+                variant="outline"
+                className="text-sm px-4 py-2 border-gray-300"
+              >
+                Add Product
+              </Button>
+            </Link>
+          </div>
+        </div>
 
-      <div className="mx-auto max-w-[90rem] p-2 space-y-8">
-        {/* Key Performance Indicators Cards */}
-        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
-          {/* Total Revenue Card */}
-          <Card className="transition-all hover:shadow-md">
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium text-gray-600">
+        <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+          <Card className="border rounded-lg bg-white">
+            <CardHeader className="p-4 flex items-center gap-2">
+              <DollarSign className="h-5 w-5 text-green-600" />
+              <CardTitle className="text-sm font-medium text-gray-700">
                 Total Revenue
               </CardTitle>
-              <DollarSign className="h-4 w-4 text-green-600" />
             </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold text-gray-900">
+            <CardContent className="p-4">
+              <p className="text-lg font-semibold text-gray-900">
                 {formatCurrency(stats.totalRevenue, "GHS")}
-              </div>
-              <p className="text-xs text-gray-500 mt-1">
-                +12.5% from last month
               </p>
-              <Progress value={75} className="mt-3 h-2" />
+              <p className="text-sm text-gray-600 mt-1">
+                Delivered:{" "}
+                {formatCurrency(stats.revenueByStatus.delivered, "GHS")}
+              </p>
             </CardContent>
           </Card>
-
-          {/* Total Orders Card */}
-          <Card className="transition-all hover:shadow-md">
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium text-gray-600">
+          <Card className="border rounded-lg bg-white">
+            <CardHeader className="p-4 flex items-center gap-2">
+              <ShoppingCart className="h-5 w-5 text-blue-600" />
+              <CardTitle className="text-sm font-medium text-gray-700">
                 Total Orders
               </CardTitle>
-              <ShoppingCart className="h-4 w-4 text-blue-600" />
             </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold text-gray-900">
+            <CardContent className="p-4">
+              <p className="text-lg font-semibold text-gray-900">
                 {stats.totalOrders.toLocaleString()}
-              </div>
-              <p className="text-xs text-gray-500 mt-1">
-                +8.2% from last month
               </p>
-              <Progress value={60} className="mt-3 h-2" />
+              <p className="text-sm text-gray-600 mt-1">
+                Pending: {stats.pendingOrders}
+              </p>
             </CardContent>
           </Card>
-
-          {/* Total Products Card */}
-          <Card className="transition-all hover:shadow-md">
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium text-gray-600">
+          <Card className="border rounded-lg bg-white">
+            <CardHeader className="p-4 flex items-center gap-2">
+              <Package className="h-5 w-5 text-purple-600" />
+              <CardTitle className="text-sm font-medium text-gray-700">
                 Total Products
               </CardTitle>
-              <Package className="h-4 w-4 text-purple-600" />
             </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold text-gray-900">
+            <CardContent className="p-4">
+              <p className="text-lg font-semibold text-gray-900">
                 {stats.totalProducts.toLocaleString()}
-              </div>
-              <p className="text-xs text-gray-500 mt-1">+4 new this week</p>
-              <Progress value={45} className="mt-3 h-2" />
+              </p>
+              <p className="text-sm text-gray-600 mt-1">
+                Low Stock: {stats.lowStockProducts}
+              </p>
             </CardContent>
           </Card>
-
-          {/* Total Customers Card */}
-          <Card className="transition-all hover:shadow-md">
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium text-gray-600">
+          <Card className="border rounded-lg bg-white">
+            <CardHeader className="p-4 flex items-center gap-2">
+              <Users className="h-5 w-5 text-orange-600" />
+              <CardTitle className="text-sm font-medium text-gray-700">
                 Total Customers
               </CardTitle>
-              <Users className="h-4 w-4 text-orange-600" />
             </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold text-gray-900">
+            <CardContent className="p-4">
+              <p className="text-lg font-semibold text-gray-900">
                 {stats.totalCustomers.toLocaleString()}
-              </div>
-              <p className="text-xs text-gray-500 mt-1">
-                +15.3% from last month
               </p>
-              <Progress value={85} className="mt-3 h-2" />
+              <p className="text-sm text-gray-600 mt-1">Active Accounts</p>
             </CardContent>
           </Card>
         </div>
 
-        {/* Main Content Area with Tabs */}
         <Tabs defaultValue="overview" className="space-y-6">
-          <TabsList className="grid grid-cols-4 w-full max-w-md">
-            <TabsTrigger value="overview">Overview</TabsTrigger>
-            <TabsTrigger value="orders">Orders</TabsTrigger>
-            <TabsTrigger value="products">Products</TabsTrigger>
-            <TabsTrigger value="analytics">Analytics</TabsTrigger>
+          <TabsList className="grid grid-cols-3 w-full max-w-sm bg-white border rounded-lg">
+            <TabsTrigger value="overview" className="text-sm py-2">
+              Overview
+            </TabsTrigger>
+            <TabsTrigger value="orders" className="text-sm py-2">
+              Orders
+            </TabsTrigger>
+            <TabsTrigger value="products" className="text-sm py-2">
+              Products
+            </TabsTrigger>
           </TabsList>
 
-          {/* Overview Tab Content */}
           <TabsContent value="overview" className="space-y-6">
-            <div className="grid gap-6 md:grid-cols-2">
-              {/* Recent Orders Section */}
-              <Card>
-                <CardHeader className="flex flex-row items-center justify-between">
-                  <div>
-                    <CardTitle className="text-lg">Recent Orders</CardTitle>
-                    <CardDescription>
-                      Latest customer orders requiring attention
-                    </CardDescription>
-                  </div>
-                  <Button asChild variant="outline" size="sm">
-                    <Link href="/admin/orders">View All</Link>
-                  </Button>
+            <div className="grid gap-6 sm:grid-cols-2">
+              <Card className="border rounded-lg bg-white">
+                <CardHeader className="p-4 flex justify-between items-center">
+                  <CardTitle className="text-base font-semibold text-gray-900">
+                    Recent Orders
+                  </CardTitle>
+                  <Link href="/admin/orders">
+                    <Button
+                      variant="outline"
+                      className="text-sm px-3 py-1 border-gray-300"
+                    >
+                      View All
+                    </Button>
+                  </Link>
                 </CardHeader>
-                <CardContent className="space-y-4">
+                <CardContent className="p-4 space-y-3">
                   {stats.recentOrders.length > 0 ? (
                     stats.recentOrders.map((order) => (
                       <div
                         key={order._id}
-                        className="flex items-center justify-between p-3 rounded-lg border border-gray-100 hover:bg-gray-50 transition-colors"
+                        className="flex items-center justify-between p-3 rounded-lg border bg-gray-50 hover:bg-gray-100"
                       >
-                        <div className="space-y-1">
-                          <p className="font-medium text-sm">
-                            Order #{order._id.slice(-6)}
+                        <div className="flex-1 min-w-0">
+                          <p className="text-sm font-medium text-gray-900">
+                            #{order._id.slice(-6).toUpperCase()}
                           </p>
-                          <p className="text-xs text-gray-500">{order.email}</p>
-                          <div className="flex items-center gap-2">
+                          <p className="text-sm text-gray-600 truncate max-w-48">
+                            {order.email}
+                          </p>
+                          <div className="flex items-center gap-2 mt-2">
                             <Badge
+                              className="text-xs"
                               variant={
                                 order.deliveryStatus === "delivered"
                                   ? "default"
                                   : "secondary"
                               }
-                              className="text-xs"
                             >
                               {order.deliveryStatus}
                             </Badge>
-                            {/* <Badge */}
-                            {/*   variant={ */}
-                            {/*     order.payment.status === "paid" */}
-                            {/*       ? "default" */}
-                            {/*       : "destructive" */}
-                            {/*   } */}
-                            {/*   className="text-xs" */}
-                            {/* > */}
-                            {/*   {order.payment.status} */}
-                            {/* </Badge> */}
+                            <Badge
+                              className="text-xs"
+                              variant={
+                                order.payment.status === "completed"
+                                  ? "default"
+                                  : "destructive"
+                              }
+                            >
+                              {order.payment.status}
+                            </Badge>
                           </div>
                         </div>
                         <div className="text-right">
-                          <p className="font-semibold">
+                          <p className="text-sm font-semibold text-gray-900">
                             {formatCurrency(order.amount, "GHS")}
                           </p>
-                          <p className="text-xs text-gray-500">
-                            {new Date(order.createdAt).toLocaleDateString()}
+                          <p className="text-sm text-gray-600">
+                            {new Date(order.createdAt).toLocaleDateString(
+                              "en-GB",
+                              {
+                                day: "2-digit",
+                                month: "short",
+                                year: "numeric",
+                              }
+                            )}
                           </p>
                         </div>
                       </div>
                     ))
                   ) : (
-                    <div className="text-center py-8 text-gray-500">
-                      <ShoppingBag className="h-8 w-8 mx-auto mb-2 opacity-50" />
+                    <div className="text-center py-6 text-gray-600 text-sm">
+                      <ShoppingCart className="h-6 w-6 mx-auto mb-2 opacity-50" />
                       <p>No recent orders found</p>
                     </div>
                   )}
                 </CardContent>
               </Card>
 
-              {/* Top Products Section */}
-              <Card>
-                <CardHeader className="flex flex-row items-center justify-between">
-                  <div>
-                    <CardTitle className="text-lg">Top Products</CardTitle>
-                    <CardDescription>
-                      Best performing products in your catalog
-                    </CardDescription>
-                  </div>
-                  <Button asChild variant="outline" size="sm">
-                    <Link href="/admin/products">Manage All</Link>
-                  </Button>
+              <Card className="border rounded-lg bg-white">
+                <CardHeader className="p-4 flex justify-between items-center">
+                  <CardTitle className="text-base font-semibold text-gray-900">
+                    Top Products
+                  </CardTitle>
+                  <Link href="/admin/products">
+                    <Button
+                      variant="outline"
+                      className="text-sm px-3 py-1 border-gray-300"
+                    >
+                      Manage All
+                    </Button>
+                  </Link>
                 </CardHeader>
-                <CardContent className="space-y-4">
+                <CardContent className="p-4 space-y-3">
                   {stats.topProducts.length > 0 ? (
                     stats.topProducts.map((product) => (
                       <div
                         key={product.id}
-                        className="flex items-center gap-3 p-3 rounded-lg border border-gray-100 hover:bg-gray-50 transition-colors"
+                        className="flex items-center gap-3 p-3 rounded-lg border bg-gray-50 hover:bg-gray-100"
                       >
                         <div className="h-12 w-12 rounded-lg bg-gray-100 flex items-center justify-center overflow-hidden">
                           {product.images && product.images[0] ? (
@@ -373,17 +318,18 @@ const AdminDashboard = () => {
                               className="h-full w-full object-cover"
                             />
                           ) : (
-                            <Package className="h-5 w-5 text-gray-400" />
+                            <Package className="h-6 w-6 text-gray-400" />
                           )}
                         </div>
                         <div className="flex-1 min-w-0">
-                          <p className="font-medium text-sm truncate">
+                          <p className="text-sm font-medium text-gray-900 truncate">
                             {product.title}
                           </p>
-                          <p className="text-xs text-gray-500">
-                            Stock: {product.stock}
+                          <p className="text-sm text-gray-600">
+                            Stock: {product.stock || "N/A"} •{" "}
+                            {formatCurrency(product.price, "GHS")}
                           </p>
-                          <div className="flex items-center gap-2 mt-1">
+                          <div className="flex items-center gap-2 mt-2">
                             {product.isFeatured && (
                               <Badge variant="secondary" className="text-xs">
                                 Featured
@@ -394,101 +340,88 @@ const AdminDashboard = () => {
                                 On Sale
                               </Badge>
                             )}
+                            {!product.isAvailable && (
+                              <Badge variant="outline" className="text-xs">
+                                Out of Stock
+                              </Badge>
+                            )}
                           </div>
-                        </div>
-                        <div className="text-right">
-                          <p className="font-semibold">
-                            {formatCurrency(product.price, "GHS")}
-                          </p>
-                          {product.discount && (
-                            <p className="text-xs text-green-600">
-                              -{product.discount}%
-                            </p>
-                          )}
                         </div>
                       </div>
                     ))
                   ) : (
-                    <div className="text-center py-8 text-gray-500">
-                      <Package className="h-8 w-8 mx-auto mb-2 opacity-50" />
+                    <div className="text-center py-6 text-gray-600 text-sm">
+                      <Package className="h-6 w-6 mx-auto mb-2 opacity-50" />
                       <p>No products found</p>
                     </div>
                   )}
                 </CardContent>
               </Card>
             </div>
+
+            <Card className="border rounded-lg bg-white">
+              <CardHeader className="p-4">
+                <CardTitle className="text-base font-semibold text-gray-900">
+                  Revenue Breakdown
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="p-4">
+                <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
+                  {Object.entries(stats.revenueByStatus).map(
+                    ([status, amount]) => (
+                      <div key={status} className="p-3 rounded-lg bg-gray-50">
+                        <p className="text-sm font-medium text-gray-900 capitalize">
+                          {status}
+                        </p>
+                        <p className="text-sm text-gray-600">
+                          {formatCurrency(amount, "GHS")}
+                        </p>
+                      </div>
+                    )
+                  )}
+                </div>
+              </CardContent>
+            </Card>
           </TabsContent>
 
-          {/* Orders Tab Content */}
           <TabsContent value="orders">
-            <Card>
-              <CardHeader>
-                <CardTitle>Order Management</CardTitle>
-                <CardDescription>
-                  Monitor and manage all customer orders
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="text-center py-12 text-gray-500">
-                  <ShoppingCart className="h-12 w-12 mx-auto mb-4 opacity-50" />
-                  <h3 className="text-lg font-medium mb-2">Order Management</h3>
-                  <p className="mb-4">
-                    Full order management interface coming soon
-                  </p>
-                  <Button asChild>
-                    <Link href="/admin/orders">Go to Orders Page</Link>
+            <Card className="border rounded-lg bg-white">
+              <CardHeader className="p-4 flex justify-between items-center">
+                <CardTitle className="text-base font-semibold text-gray-900">
+                  Order Management
+                </CardTitle>
+                <Link href="/admin/orders">
+                  <Button
+                    variant="outline"
+                    className="text-sm px-3 py-1 border-gray-300"
+                  >
+                    View All
                   </Button>
-                </div>
+                </Link>
+              </CardHeader>
+              <CardContent className="p-4">
+                <OrderComponent />
               </CardContent>
             </Card>
           </TabsContent>
 
-          {/* Products Tab Content */}
           <TabsContent value="products">
-            <Card>
-              <CardHeader>
-                <CardTitle>Product Management</CardTitle>
-                <CardDescription>
-                  Manage your product catalog and inventory
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="text-center py-12 text-gray-500">
-                  <Package className="h-12 w-12 mx-auto mb-4 opacity-50" />
-                  <h3 className="text-lg font-medium mb-2">
-                    Product Management
-                  </h3>
-                  <p className="mb-4">
-                    Full product management interface coming soon
-                  </p>
-                  <Button asChild>
-                    <Link href="/admin/products">Go to Products Page</Link>
+            <Card className="border rounded-lg bg-white">
+              <CardHeader className="p-4 flex justify-between items-center">
+                <CardTitle className="text-base font-semibold text-gray-900">
+                  Product Management
+                </CardTitle>
+                <Link href="/admin/products">
+                  <Button
+                    variant="outline"
+                    className="text-sm px-3 py-1 border-gray-300"
+                  >
+                    View All
                   </Button>
-                </div>
-              </CardContent>
-            </Card>
-          </TabsContent>
-
-          {/* Analytics Tab Content */}
-          <TabsContent value="analytics">
-            <Card>
-              <CardHeader>
-                <CardTitle>Analytics & Reports</CardTitle>
-                <CardDescription>
-                  Detailed insights and performance metrics
-                </CardDescription>
+                </Link>
               </CardHeader>
-              <CardContent>
-                <div className="text-center py-12 text-gray-500">
-                  <TrendingUp className="h-12 w-12 mx-auto mb-4 opacity-50" />
-                  <h3 className="text-lg font-medium mb-2">
-                    Analytics Dashboard
-                  </h3>
-                  <p className="mb-4">
-                    Advanced analytics and reporting tools coming soon
-                  </p>
-                  <Button variant="outline">View Sample Reports</Button>
-                </div>
+              <CardContent className="p-4">
+                <ProductsList />
               </CardContent>
             </Card>
           </TabsContent>

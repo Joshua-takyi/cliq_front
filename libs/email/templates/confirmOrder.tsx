@@ -7,7 +7,7 @@ export interface OrderProps {
   currency: string;
   items: ItemsProp[];
   shippingInfo: ShippingInfoProps;
-  createdAt: Date
+  createdAt: Date;
   payment: PaymentProps;
 }
 
@@ -39,11 +39,13 @@ export interface ShippingInfoProps {
 }
 
 function formatOrderDate(date: Date) {
-  return new Date(date).toUTCString()
+  return new Date(date).toUTCString();
 }
 
 function formatCurrency(amount: number, currency: string) {
-  return new Intl.NumberFormat('en-US', { style: 'currency', currency }).format(amount);
+  return new Intl.NumberFormat("en-US", { style: "currency", currency }).format(
+    amount
+  );
 }
 
 function generateOrderItemsHTML(items: ItemsProp[]) {
@@ -56,18 +58,19 @@ function generateOrderItemsHTML(items: ItemsProp[]) {
         </div>
       `
     )
-    .join('');
+    .join("");
 }
 
 function formatShippingAddress(info: ShippingInfoProps) {
   return [info.street, info.city, info.region, info.ghana_post]
     .filter(Boolean)
-    .join(', ');
+    .join(", ");
 }
 
-
 function CalculateDeliveryFee(region: string) {
-  return region.toLowerCase() === "accra" || "Greater Accra" ? "GHS 30.00" : "GHS 50.00";
+  return region.toLowerCase() === "accra" || "Greater Accra"
+    ? "GHS 30.00"
+    : "GHS 50.00";
 }
 
 export const GenerateOrderConfirmationEmail = (orderDetails: OrderProps) => {
@@ -91,10 +94,17 @@ export const GenerateOrderConfirmationEmail = (orderDetails: OrderProps) => {
       
       <div style="margin: 30px 0;">
         <div><strong>Order ID:</strong> ${orderDetails.orderId}</div>
-        <div><strong>Date:</strong> ${formatOrderDate(orderDetails.createdAt)}</div>
+        <div><strong>Date:</strong> ${formatOrderDate(
+          orderDetails.createdAt
+        )}</div>
         <div><strong>Status:</strong> ${orderDetails.status}</div>
-        <div><strong>Total:</strong> ${formatCurrency(orderDetails.amount, orderDetails.currency)}</div>
-        <div><strong>DeliveryFee:</strong> ${CalculateDeliveryFee(orderDetails.shippingInfo.region || " ")}</div>
+        <div><strong>Total:</strong> ${formatCurrency(
+          orderDetails.amount,
+          orderDetails.currency
+        )}</div>
+        <div><strong>DeliveryFee:</strong> ${CalculateDeliveryFee(
+          orderDetails.shippingInfo.region || " "
+        )}</div>
       </div>
       
       <div style="margin: 30px 0;">
@@ -122,7 +132,7 @@ export const GenerateOrderConfirmationEmail = (orderDetails: OrderProps) => {
       <p>Thank you again for shopping with us.<br>Your Store Team</p>
       
       <div style="margin-top: 50px; padding-top: 20px; border-top: 1px solid #eee; font-size: 14px; color: #666;">
-        <div>Questions? Email us at <a href="mailto:support@yourstore.com" style="color: #666;">support@yourstore.com</a></div>
+        <div>Questions? Email us at <a href="mailto:support@OhCase!.com" style="color: #666;">support@OhCase!.com</a></div>
       </div>
       
     </div>

@@ -1,17 +1,13 @@
 "use client";
 
-import { use } from "react";
-import { useParams } from "next/navigation";
-import { useState, useEffect } from "react";
-import { Filter, X } from "lucide-react";
-import { motion, AnimatePresence } from "framer-motion";
 import Grid from "@/components/grid";
-import CollectionHeader from "@/components/CollectionHead";
 import ProductFilter from "@/components/ProductFilter";
+import { AnimatePresence, motion } from "framer-motion";
+import { Filter, X } from "lucide-react";
+import { useEffect, useState } from "react";
 
 export default function CollectionPage() {
   // Get the slug from the URL parameters to identify which collection we're viewing
-  const params = useParams();
   // Unwrap params Promise using React.use() for compatibility with Next.js latest versions
   // Using 'unknown' first to handle the type conversion safely
   // const resolvedParams = use(params as unknown as Promise<{ slug: string }>);

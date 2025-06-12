@@ -2,10 +2,10 @@ import ResponsiveLazyImage from "@/components/lazyImage";
 import Link from "next/link";
 
 export interface OrderItem {
-  id?: string; // Optional ID field to match server response
+  id?: string;
   slug: string;
-  quantity: number | string; // Can be string from server, will convert to number
-  price: number | string; // Can be string from server, will convert to number
+  quantity: number | string;
+  price: number | string;
   image: string;
   color: string;
   title: string;
@@ -17,17 +17,39 @@ export interface OrderCardProps {
   orderId?: string;
   createdAt?: string;
   amount: number;
-  // Items is always an array based on the server response structure
   items: OrderItem[];
-  // Maximum number of items to display - controls pagination at item level
   maxItemsToShow?: number;
 }
 
-// Individual Item Card Component - displays a single item from an order as its own card
+// Helper function to safely convert price to number
+const formatPrice = (price: number | string): number => {
+  return typeof price === "string" ? parseFloat(price) || 0 : price || 0;
+};
+
+// Helper function for status styling
+const getStatusStyle = (status: string): string => {
+  const statusMap: Record<string, string> = {
+    delivered: "text-green-500 bg-green-50",
+    completed: "text-green-500 bg-green-50",
+    pending: "text-yellow-500 bg-yellow-50",
+    processing: "text-yellow-500 bg-yellow-50",
+    cancelled: "text-red-500 bg-red-50",
+    failed: "text-red-500 bg-red-50",
+    confirmed: "text-blue-500 bg-blue-50",
+    paid: "text-blue-500 bg-blue-50",
+    shipped: "text-purple-500 bg-purple-50",
+    in_transit: "text-purple-500 bg-purple-50",
+  };
+  return statusMap[status.toLowerCase()] || "text-gray-500 bg-gray-50";
+};
+
+// Individual Item Card Component
 const ItemCard = ({
   item,
   orderInfo,
-}: {
+  totalItemsCount,
+}: // orderTotal,
+{
   item: OrderItem;
   orderInfo: {
     _id: string;
@@ -35,145 +57,89 @@ const ItemCard = ({
     status: string;
     createdAt?: string;
   };
+  totalItemsCount: number;
+  orderTotal: number;
 }) => {
-  // Enhanced price conversion helper with detailed validation and error handling
-  const formatPrice = (price: number | string): number => {
-    if (typeof price === "string") {
-      const numericPrice = parseFloat(price);
-      return isNaN(numericPrice) ? 0 : numericPrice;
-    }
-    return price || 0;
-  };
-
-  // Enhanced quantity conversion with type safety and validation
   const itemQuantity =
     typeof item.quantity === "string"
       ? parseInt(item.quantity, 10) || 0
       : item.quantity || 0;
-
-  // Calculate the formatted price for display with proper error handling
   const itemPrice = formatPrice(item.price);
-
-  // Enhanced status styling with comprehensive status coverage for individual items
-  const getStatusStyle = (status: string) => {
-    switch (status.toLowerCase()) {
-      case "delivered":
-      case "completed":
-        return "text-green-600 bg-green-50 border-green-200";
-      case "pending":
-      case "processing":
-        return "text-yellow-600 bg-yellow-50 border-yellow-200";
-      case "cancelled":
-      case "failed":
-        return "text-red-600 bg-red-50 border-red-200";
-      case "confirmed":
-      case "paid":
-        return "text-blue-600 bg-blue-50 border-blue-200";
-      case "shipped":
-      case "in_transit":
-        return "text-purple-600 bg-purple-50 border-purple-200";
-      default:
-        return "text-gray-600 bg-gray-50 border-gray-200";
-    }
-  };
-
-  // Enhanced date formatting with comprehensive error handling
   const formattedDate = orderInfo.createdAt
     ? new Date(orderInfo.createdAt).toLocaleDateString("en-GH", {
         year: "numeric",
         month: "short",
         day: "numeric",
       })
-    : "Date unavailable";
+    : "N/A";
 
   return (
-    <Link href={`/profile/order/${orderInfo.orderId}`} className="block">
-      {/* Individual Item Card - compact and focused on a single item */}
-      <div className="block no-underline border border-gray-200 rounded-lg p-4 lg:p-5 ">
-        {/* Item Header with Order Info - Compact but informative */}
-        <div className="flex justify-between items-start mb-3">
-          <div className="flex-1 min-w-0">
-            <p className="text-xs text-gray-500 mb-1">
-              Order #{orderInfo.orderId || orderInfo._id.slice(-8)} •{" "}
-              {formattedDate}
-            </p>
-            <span
-              className={`inline-block px-2 py-1 text-xs font-medium rounded-full border ${getStatusStyle(
-                orderInfo.status,
-              )}`}
-            >
-              {orderInfo.status.charAt(0).toUpperCase() +
-                orderInfo.status.slice(1)}
-            </span>
-          </div>
-        </div>
+    <Link href={`/profile/order/${orderInfo.orderId || orderInfo._id}`}>
+      <div className="flex gap-2 p-2 bg-white border border-gray-100 rounded-md hover:bg-gray-50 transition-colors">
+        {/* Image */}
+        <ResponsiveLazyImage
+          src={item.image}
+          alt={item.title || item.slug}
+          width={40}
+          height={40}
+          sizes="(max-width: 640px) 40px, 48px"
+          className="rounded w-10 h-10 object-cover"
+        />
 
-        {/* Main Item Content - Product image and details in a prominent layout */}
-        <div className="flex gap-3 sm:gap-4">
-          {/* Product Image - Larger and more prominent for individual display */}
-          <div className="flex-shrink-0">
-            <ResponsiveLazyImage
-              src={item.image}
-              alt={item.title || item.slug}
-              width={80}
-              height={80}
-              sizes="(max-width: 640px) 80px, (max-width: 768px) 90px, 100px"
-              className="rounded-lg object-cover w-[80px] h-[80px] sm:w-[90px] sm:h-[90px] lg:w-[100px] lg:h-[100px] border border-gray-100"
-            />
-          </div>
-
-          {/* Product Details - Enhanced layout for individual item display */}
-          <div className="flex-1 min-w-0">
-            <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-2">
-              <div className="flex-1 min-w-0">
-                {/* Product Title - More prominent in individual card */}
-                <h3 className="font-semibold text-gray-900 text-base sm:text-lg leading-tight mb-2">
-                  {item.title}
-                </h3>
-
-                {/* Product Attributes - Color and quantity with better spacing */}
-                <div className="flex flex-col xs:flex-row xs:items-center gap-2 xs:gap-4">
-                  <div className="flex items-center gap-2">
-                    <span className="text-sm text-gray-600">Color:</span>
-                    <span
-                      className="w-4 h-4 rounded-full border border-gray-300 inline-block shadow-sm"
-                      style={{ backgroundColor: item.color }}
-                      title={item.color}
-                    />
-                  </div>
-                  <div className="flex items-center gap-1">
-                    <span className="text-sm text-gray-600">Quantity:</span>
-                    <span className="text-sm font-medium text-gray-900">
-                      {itemQuantity}
-                    </span>
-                  </div>
-                </div>
-              </div>
-
-              {/* Pricing Information - More prominent display for individual items */}
-              <div className="text-left sm:text-right sm:ml-4 mt-2 sm:mt-0">
-                <p className="font-bold text-gray-900 text-lg sm:text-xl">
-                  ₵{itemPrice.toLocaleString()}
-                </p>
-                {itemQuantity > 1 && (
-                  <p className="text-sm text-gray-500 mt-1">
-                    ₵{(itemPrice / itemQuantity).toLocaleString()} per item
-                  </p>
-                )}
-              </div>
+        {/* Content */}
+        <div className="flex-1 min-w-0 space-y-0.5">
+          {/* Header */}
+          <div className="flex justify-between items-start gap-2">
+            <div className="space-y-0.5">
+              <p className="text-[10px] text-gray-500 truncate">
+                #{orderInfo.orderId || orderInfo._id.slice(-6)} •{" "}
+                {formattedDate}
+              </p>
+              <span
+                className={`inline-block px-1 py-0.5 text-[10px] font-medium rounded-md ${getStatusStyle(
+                  orderInfo.status
+                )}`}
+              >
+                {orderInfo.status.charAt(0).toUpperCase() +
+                  orderInfo.status.slice(1)}
+              </span>
+            </div>
+            <div className="text-[10px] text-gray-500 text-right">
+              <span>
+                {totalItemsCount} {totalItemsCount === 1 ? "item" : "items"}
+              </span>
             </div>
           </div>
-        </div>
 
-        {/* Item Footer - Additional context and actions */}
-        <div className="mt-4 pt-3 border-t border-gray-100">
-          <div className="flex justify-between items-center text-sm">
-            <span className="text-gray-500">
-              From Order #{orderInfo.orderId || orderInfo._id.slice(-8)}
-            </span>
-            <span className="text-blue-600 hover:text-blue-700 font-medium">
-              View Order Details →
-            </span>
+          {/* Details */}
+          <h3 className="text-xs font-medium text-gray-900 line-clamp-1">
+            {item.title}
+          </h3>
+          <div className="flex gap-2 text-[10px] text-gray-600">
+            <span>Qty: {itemQuantity}</span>
+            <div className="flex items-center gap-0.5">
+              <span>Color:</span>
+              <span
+                className="w-2.5 h-2.5 rounded-full border border-gray-200"
+                style={{ backgroundColor: item.color }}
+                title={item.color}
+              />
+            </div>
+          </div>
+
+          {/* Price and Total */}
+          <div className="flex justify-between items-center">
+            <span className="text-[10px] text-gray-500">Item Total</span>
+            <div className="text-right space-y-0.5">
+              <p className="text-xs font-semibold text-gray-900">
+                ₵{itemPrice.toLocaleString()}
+              </p>
+              {itemQuantity > 1 && (
+                <p className="text-[9px] text-gray-500">
+                  ₵{(itemPrice / itemQuantity).toLocaleString()} each
+                </p>
+              )}
+            </div>
           </div>
         </div>
       </div>
@@ -181,76 +147,53 @@ const ItemCard = ({
   );
 };
 
-// Main OrderCard Component - shows only 1 item for multi-item orders, all items for single-item orders
+// Main OrderCard Component
 const OrderCard = ({
   _id,
   status,
   orderId,
   createdAt,
   items,
-  maxItemsToShow = 1, // Default to showing 1 item for multi-item orders to keep UI clean
-}: Omit<OrderCardProps, "amount">) => {
-  // Enhanced guard against missing or empty items with detailed error context
+  amount,
+  maxItemsToShow = 1,
+}: OrderCardProps) => {
   if (!items || !Array.isArray(items) || items.length === 0) {
-    console.warn(`OrderCard: Invalid or empty items array for order ${_id}`, {
-      orderId: orderId || _id.slice(-8),
-      receivedItems: items,
-      itemsType: typeof items,
-      isArray: Array.isArray(items),
-    });
+    console.warn(
+      `OrderCard: Invalid items for order ${orderId || _id.slice(-6)}`
+    );
     return null;
   }
 
-  // Smart item display logic: show 1 item for multi-item orders, all items for single-item orders
-  const totalItemsCount = items.length;
-  const shouldLimitItems = totalItemsCount > 1; // Only limit display when there are multiple items
-  const itemsToDisplay = shouldLimitItems
-    ? items.slice(0, maxItemsToShow)
-    : items;
-  const remainingItemsCount = shouldLimitItems
-    ? Math.max(0, totalItemsCount - maxItemsToShow)
-    : 0;
-  const hasMoreItems = remainingItemsCount > 0;
-
-  // Prepare order information object for each item card
-  const orderInfo = {
-    _id,
-    orderId,
-    status,
-    createdAt,
-  };
+  const totalItemsCount = items.reduce(
+    (sum, item) =>
+      sum +
+      (typeof item.quantity === "string"
+        ? parseInt(item.quantity, 10) || 0
+        : item.quantity || 0),
+    0
+  );
+  const itemsToDisplay = items.slice(0, maxItemsToShow);
+  const orderInfo = { _id, orderId, status, createdAt };
 
   return (
-    <div className="space-y-3">
-      {/* Display limited number of item cards based on maxItemsToShow prop */}
+    <div className="space-y-1.5">
       {itemsToDisplay.map((item, index) => (
         <ItemCard
-          key={`${_id}-item-${index}-${item.slug || item.id || index}`}
+          key={`${_id}-${item.slug || item.id || index}`}
           item={item}
           orderInfo={orderInfo}
+          totalItemsCount={totalItemsCount}
+          orderTotal={amount}
         />
       ))}
-
-      {/* Enhanced "More Items" indicator - shows when there are additional items not displayed */}
-      {hasMoreItems && (
-        <div className="border border-gray-200 rounded-lg p-4 bg-gray-50">
-          <div className="flex justify-between items-center">
-            <div className="flex items-center gap-2">
-              <span className="text-sm font-medium text-gray-700">
-                +{remainingItemsCount} more{" "}
-                {remainingItemsCount === 1 ? "item" : "items"} in this order
-              </span>
-              <span className="px-2 py-1 text-xs bg-blue-100 text-blue-700 rounded-full">
-                {totalItemsCount} total
-              </span>
-            </div>
-            <Link
-              href={`/profile/order/${orderId || _id}`}
-              className="text-sm text-blue-600 hover:text-blue-700 font-medium flex items-center gap-1 hover:underline transition-colors"
-            >
-              View all items
+      {items.length > maxItemsToShow && (
+        <Link href={`/profile/order/${orderId || _id}`}>
+          <div className="flex justify-between items-center p-1.5 bg-gray-50 border border-gray-100 rounded-md text-[10px] text-gray-600 hover:bg-gray-100 transition-colors">
+            <span>View order details ({items.length} total items)</span>
+            <span className="text-blue-500 font-medium flex items-center gap-0.5">
+              ₵{amount.toLocaleString()}
               <svg
-                className="w-4 h-4"
+                className="w-2.5 h-2.5"
                 fill="none"
                 stroke="currentColor"
                 viewBox="0 0 24 24"
@@ -262,9 +205,9 @@ const OrderCard = ({
                   d="M9 5l7 7-7 7"
                 />
               </svg>
-            </Link>
+            </span>
           </div>
-        </div>
+        </Link>
       )}
     </div>
   );

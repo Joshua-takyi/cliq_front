@@ -36,26 +36,35 @@ export function formatOrderDate(date: Date) {
 }
 
 export function formatCurrency(amount: number, currency: string) {
-  return new Intl.NumberFormat('en-US', { style: 'currency', currency }).format(amount);
+  return new Intl.NumberFormat("en-US", { style: "currency", currency }).format(
+    amount
+  );
 }
 
 export function generateOrderItemsHTML(items: ItemsProp[]) {
   return `
     <table cellpadding="0" cellspacing="0" border="0" style="border-collapse: collapse; width: 100%; max-width: 600px; font-family: Arial, Helvetica, sans-serif;">
       ${items
-      .map(
-        (item) => `
+        .map(
+          (item) => `
             <tr>
               <td style="padding: 10px 0; vertical-align: middle;">
-                <img src="${item.image || 'https://via.placeholder.com/40'}" alt="${item.title}" width="40" height="40" style="display: block; border: 0; border-radius: 4px; margin: 0;" />
+                <img src="${
+                  item.image || "https://via.placeholder.com/40"
+                }" alt="${
+            item.title
+          }" width="40" height="40" style="display: block; border: 0; border-radius: 4px; margin: 0;" />
               </td>
               <td style="padding: 10px 0 10px 5px; vertical-align: middle; font-size: 14px; line-height: 1.4; margin: 0;">
-                ${item.title} (${item.quantity} x ${formatCurrency(item.price, 'GHS')})
+                ${item.title} (${item.quantity} x ${formatCurrency(
+            item.price,
+            "GHS"
+          )})
               </td>
             </tr>
           `
-      )
-      .join('')}
+        )
+        .join("")}
     </table>
   `;
 }
@@ -63,11 +72,14 @@ export function generateOrderItemsHTML(items: ItemsProp[]) {
 export function formatShippingAddress(info: ShippingInfoProps) {
   return [info.street, info.city, info.region, info.ghana_post]
     .filter(Boolean)
-    .join(', ');
+    .join(", ");
 }
 
 export function CalculateDeliveryFee(region: string) {
-  return region.toLowerCase() === "accra" || region.toLowerCase() === "greater accra" ? "GHS 30.00" : "GHS 50.00";
+  return region.toLowerCase() === "accra" ||
+    region.toLowerCase() === "greater accra"
+    ? "GHS 30.00"
+    : "GHS 50.00";
 }
 
 export function ProcessingOrderTemplate({
@@ -95,13 +107,20 @@ export function ProcessingOrderTemplate({
             
             <p>Hi ${customerName || "Customer"},</p>
             
-            <p>Thank you for your order <strong>#${orderId}</strong> placed on ${formatOrderDate(orderDate)}. We're preparing it for shipment and will notify you once it's on the way.</p>
+            <p>Thank you for your order <strong>#${orderId}</strong> placed on ${formatOrderDate(
+      orderDate
+    )}. We're preparing it for shipment and will notify you once it's on the way.</p>
             
             <div style="margin: 20px 0;">
               <div><strong>Order ID:</strong> ${orderId}</div>
               <div><strong>Date:</strong> ${formatOrderDate(orderDate)}</div>
-              <div><strong>Total:</strong> ${formatCurrency(total, currency)}</div>
-              <div><strong>Delivery Fee:</strong> ${CalculateDeliveryFee(shippingInfo.region || " ")}</div>
+              <div><strong>Total:</strong> ${formatCurrency(
+                total,
+                currency
+              )}</div>
+              <div><strong>Delivery Fee:</strong> ${CalculateDeliveryFee(
+                shippingInfo.region || " "
+              )}</div>
             </div>
             
             <div style="margin: 20px 0;">
@@ -123,7 +142,7 @@ export function ProcessingOrderTemplate({
             <p style="margin: 0;">Thank you for shopping with us,<br>Your Store Team</p>
             
             <div style="margin-top: 30px; padding-top: 20px; border-top: 1px solid #eee; font-size: 14px; color: #666;">
-              <div>Questions? Email us at <a href="mailto:support@yourstore.com" style="color: #666;">support@yourstore.com</a></div>
+              <div>Questions? Email us at <a href="mailto:support@OhCase!.com" style="color: #666;">support@OhCase!.com</a></div>
             </div>
           </div>
         </body>

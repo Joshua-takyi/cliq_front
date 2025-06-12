@@ -25,7 +25,7 @@ export const useOrder = () => {
 
         if (!res.data) {
           throw new Error(
-            "No response data received from server during order retrieval",
+            "No response data received from server during order retrieval"
           );
         }
 
@@ -38,10 +38,10 @@ export const useOrder = () => {
         if (!Array.isArray(res.data.data)) {
           console.error(
             "Server returned non-array data for user orders:",
-            res.data.data,
+            res.data.data
           );
           throw new Error(
-            "Invalid data format received from server - expected array of orders",
+            "Invalid data format received from server - expected array of orders"
           );
         }
 
@@ -51,7 +51,6 @@ export const useOrder = () => {
         throw error;
       }
     },
-    enabled: false, // Manually triggered to control when orders are fetched
     staleTime: 5 * 60 * 1000, // Consider data fresh for 5 minutes
     gcTime: 10 * 60 * 1000, // Keep in cache for 10 minutes (updated API)
   });

@@ -449,7 +449,7 @@ export default function ProductFilter() {
         </div>
 
         {/* Sort Options - Essential for e-commerce browsing */}
-        <div className="border-b border-gray-50 pb-3">
+        {/* <div className="border-b border-gray-50 pb-3">
           <button
             onClick={() => toggleAccordion("sort")}
             className="flex items-center justify-between w-full text-left py-1"
@@ -478,38 +478,9 @@ export default function ProductFilter() {
               </select>
             </div>
           )}
-        </div>
+        </div> */}
 
         {/* Material & Color Specifications - For detailed filtering */}
-        <div className="border-b border-gray-50 pb-3">
-          <button
-            onClick={() => toggleAccordion("specifications")}
-            className="flex items-center justify-between w-full text-left py-1"
-          >
-            <h3 className="text-xs font-medium text-gray-900">Colors</h3>
-            <ChevronDown
-              className={`h-3 w-3 text-gray-500 transition-transform ${
-                accordionState.specifications ? "rotate-180" : ""
-              }`}
-            />
-          </button>
-
-          <div className="mt-2 space-y-2">
-            {/* Color Filter - Compact dropdown */}
-            <select
-              value={filters.colors}
-              onChange={(e) => handleFilterChange("colors", e.target.value)}
-              className="w-full p-1.5 border border-gray-300 rounded-none text-xs focus:ring-1 focus:ring-blue-500 focus:border-blue-500 transition-all"
-            >
-              <option value="">All Colors</option>
-              {FILTER_OPTIONS.colors.map((color) => (
-                <option key={color} value={color}>
-                  {color}
-                </option>
-              ))}
-            </select>
-          </div>
-        </div>
       </div>
 
       {/* Minimal filter summary - only show when filters are active */}

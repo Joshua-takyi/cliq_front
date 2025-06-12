@@ -3,26 +3,25 @@
 import { UseCart } from "@/hooks/useCart";
 import { ProductProps } from "@/types/product_types";
 import { motion } from "framer-motion";
-import { useSession } from "next-auth/react";
-import { useState } from "react";
-import { toast } from "sonner";
 import {
-  Heart,
+  RotateCcw,
   Share2,
+  Shield,
   ShoppingBag,
   Star,
   Truck,
-  Shield,
-  RotateCcw,
 } from "lucide-react";
+import { useSession } from "next-auth/react";
+import { useState } from "react";
+import { toast } from "sonner";
 import { Accordion } from "../ui/accordion"; // Import the new Accordion component
 import { Badge } from "../ui/badge";
 import { Button } from "../ui/button";
 import { Input } from "../ui/input";
 import { Label } from "../ui/label";
 import ProductImageSection from "./ProductImageSection";
-import RelatedProducts from "./RelatedProducts";
 import ProductReviews from "./ProductReviews";
+import RelatedProducts from "./RelatedProducts";
 
 interface ProductDisplayProps {
   product: ProductProps;
@@ -38,9 +37,9 @@ const ProductDisplay: React.FC<ProductDisplayProps> = ({ product }) => {
   const [selectedModel, setSelectedModel] = useState<string>(
     product?.models?.length ? product.models[0] : ""
   );
-  const [isWishlisted, setIsWishlisted] = useState(false); // State for wishlist functionality
+  // const [isWishlisted, setIsWishlisted] = useState(false); // State for wishlist functionality
   const [isAddingToCart, setIsAddingToCart] = useState(false);
-  const [isAddingToWishlist, setIsAddingToWishlist] = useState(false);
+  // const [isAddingToWishlist, setIsAddingToWishlist] = useState(false);
 
   // Use the cart hook
   const { AddToCart } = UseCart();
@@ -80,30 +79,30 @@ const ProductDisplay: React.FC<ProductDisplayProps> = ({ product }) => {
   };
 
   // Function to handle adding/removing from wishlist
-  const handleWishlistToggle = async () => {
-    if (!session.data || !session.data.user) {
-      toast.error("Please sign in to manage your wishlist.");
-      return;
-    }
+  // const handleWishlistToggle = async () => {
+  //   if (!session.data || !session.data.user) {
+  //     toast.error("Please sign in to manage your wishlist.");
+  //     return;
+  //   }
 
-    setIsAddingToWishlist(true);
+  //   setIsAddingToWishlist(true);
 
-    try {
-      await new Promise((resolve) => setTimeout(resolve, 800));
+  //   try {
+  //     await new Promise((resolve) => setTimeout(resolve, 800));
 
-      setIsWishlisted(!isWishlisted);
+  //     setIsWishlisted(!isWishlisted);
 
-      if (!isWishlisted) {
-        toast.success("Added to wishlist!");
-      } else {
-        toast.success("Removed from wishlist!");
-      }
-    } catch (error) {
-      toast.error("Failed to update wishlist. Please try again.");
-    } finally {
-      setIsAddingToWishlist(false);
-    }
-  };
+  //     if (!isWishlisted) {
+  //       toast.success("Added to wishlist!");
+  //     } else {
+  //       toast.success("Removed from wishlist!");
+  //     }
+  //   } catch (error) {
+  //     toast.error("Failed to update wishlist. Please try again.");
+  //   } finally {
+  //     setIsAddingToWishlist(false);
+  //   }
+  // };
 
   // Function to handle product sharing
   const handleShare = async () => {
@@ -514,7 +513,7 @@ const ProductDisplay: React.FC<ProductDisplayProps> = ({ product }) => {
 
             {/* Product action buttons (Wishlist and Share) */}
             <div className="flex items-center gap-2">
-              <Button
+              {/* <Button
                 variant="outline"
                 size="sm"
                 onClick={handleWishlistToggle}
@@ -534,7 +533,7 @@ const ProductDisplay: React.FC<ProductDisplayProps> = ({ product }) => {
                   />
                 )}
                 {isWishlisted ? "In Wishlist" : "Add to Wishlist"}
-              </Button>
+              </Button> */}
 
               <Button
                 variant="outline"
@@ -829,6 +828,12 @@ const ProductDisplay: React.FC<ProductDisplayProps> = ({ product }) => {
           </div>
         </div>
       </div>
+
+      {/* Related Products Section */}
+      <div className="border-t border-gray-200 pt-8">
+        <RelatedProducts productId={product.id || ""} />
+      </div>
+
       {/* Review Section */}
       <div className="border-t border-gray-200 pt-8">
         <div className="mb-6">
@@ -843,11 +848,6 @@ const ProductDisplay: React.FC<ProductDisplayProps> = ({ product }) => {
           productId={product.id || ""}
           productTitle={product.title}
         />
-      </div>
-
-      {/* Related Products Section */}
-      <div className="border-t border-gray-200 pt-8">
-        <RelatedProducts productId={product.id || ""} />
       </div>
     </div>
   );

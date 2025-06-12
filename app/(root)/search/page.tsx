@@ -1,14 +1,14 @@
 "use client";
 
-import { useSearchParams } from "next/navigation";
-import { useState, useEffect } from "react";
-import { motion, AnimatePresence } from "framer-motion";
-import { useProduct } from "@/hooks/useProduct";
-import ProductCard from "@/components/productCard";
-import { ProductProps } from "@/types/product_types";
-import ProductFilter from "@/components/ProductFilter";
-import { Filter, X } from "lucide-react";
 import Loader from "@/app/loading";
+import ProductCard from "@/components/productCard";
+import ProductFilter from "@/components/ProductFilter";
+import { useProduct } from "@/hooks/useProduct";
+import { ProductProps } from "@/types/product_types";
+import { AnimatePresence, motion } from "framer-motion";
+import { Filter, X } from "lucide-react";
+import { useSearchParams } from "next/navigation";
+import { useState } from "react";
 
 export default function SearchPage() {
   // Get search params from URL

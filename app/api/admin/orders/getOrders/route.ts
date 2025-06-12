@@ -14,7 +14,7 @@ export async function GET(request: Request) {
           message: "Unauthorized access. Only admins can view orders.",
           error: "Unauthorized",
         },
-        { status: 403 },
+        { status: 403 }
       );
     }
 
@@ -55,7 +55,7 @@ export async function GET(request: Request) {
           message: "No orders found.",
           data: [],
         },
-        { status: 204 },
+        { status: 204 }
       );
     }
 
@@ -75,7 +75,7 @@ export async function GET(request: Request) {
         message: "An error occurred while fetching orders.",
         eorror: error instanceof Error ? error.message : "Unknown error",
       },
-      { status: 500 },
+      { status: 500 }
     );
   }
 }

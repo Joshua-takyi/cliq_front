@@ -60,13 +60,13 @@ export const Cart = () => {
                 image: item.image,
                 total_price: item.total_price,
                 quantity: item.quantity,
-                product_Id: item.product_Id,
+                product_id: item.id, // Fixed: Changed from product_Id to product_id to match CartData interface
               },
             ],
             total_amount: item.total_price,
           },
         }));
-        setCartItems(cartItems);
+        setCartItems(cartItems); // Set the mapped cart items array to state
       }
     } catch (error) {}
   };
@@ -142,7 +142,7 @@ export const Cart = () => {
       setCartItems((prevItems) =>
         prevItems.map((item) =>
           item.cartDetails.items.some(
-            (cartItem) => cartItem.product_Id === productId
+            (cartItem) => cartItem.product_id === productId // Fixed: Changed from product_Id to product_id to match CartData interface
           ) &&
           item.cartDetails.items.some((cartItem) => cartItem.color === color) &&
           item.cartDetails.items.some((cartItem) => cartItem.model === model)
@@ -166,7 +166,7 @@ export const Cart = () => {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          product_Id: productId,
+          product_id: productId, // Fixed: Changed from product_Id to product_id to maintain consistency with CartData interface
           color,
           model,
           quantity: newQuantity,
@@ -278,7 +278,7 @@ export const Cart = () => {
                 {cartItems.map((item, index) => (
                   <CartCard
                     cartDetails={item.cartDetails}
-                    key={`${item.cartDetails.items[0].product_Id}-${item.cartDetails.items[0].color}-${item.cartDetails.items[0].model}-${index}`}
+                    key={`${item.cartDetails.items[0].product_id}-${item.cartDetails.items[0].color}-${item.cartDetails.items[0].model}-${index}`} // Fixed: Changed from product_Id to product_id to match CartData interface
                     onUpdateQuantity={updateCartItemQuantity}
                   />
                 ))}

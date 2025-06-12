@@ -1,5 +1,12 @@
-
-import { CalculateDeliveryFee, ConfirmOrderParams, EmailTemplate, formatCurrency, formatOrderDate, formatShippingAddress, generateOrderItemsHTML } from "./processingOrder";
+import {
+  CalculateDeliveryFee,
+  ConfirmOrderParams,
+  EmailTemplate,
+  formatCurrency,
+  formatOrderDate,
+  formatShippingAddress,
+  generateOrderItemsHTML,
+} from "./processingOrder";
 
 export function CancelledOrderTemplate({
   orderId,
@@ -26,15 +33,22 @@ export function CancelledOrderTemplate({
 
             <p>Hi ${customerName || "Customer"},</p>
 
-            <p>We’re writing to let you know that your order <strong>#${orderId}</strong> placed on ${formatOrderDate(orderDate)} has been cancelled.</p>
+            <p>We’re writing to let you know that your order <strong>#${orderId}</strong> placed on ${formatOrderDate(
+      orderDate
+    )} has been cancelled.</p>
 
             <p>If this was a mistake or if you have any questions, feel free to reach out to us. Below are the details of the cancelled order:</p>
 
             <div style="margin: 20px 0;">
               <div><strong>Order ID:</strong> ${orderId}</div>
               <div><strong>Date:</strong> ${formatOrderDate(orderDate)}</div>
-              <div><strong>Total:</strong> ${formatCurrency(total, currency)}</div>
-              <div><strong>Delivery Fee:</strong> ${CalculateDeliveryFee(shippingInfo.region || " ")}</div>
+              <div><strong>Total:</strong> ${formatCurrency(
+                total,
+                currency
+              )}</div>
+              <div><strong>Delivery Fee:</strong> ${CalculateDeliveryFee(
+                shippingInfo.region || " "
+              )}</div>
             </div>
 
             <div style="margin: 20px 0;">
@@ -56,7 +70,7 @@ export function CancelledOrderTemplate({
             <p style="margin: 0;">We’re here to help anytime,<br>Your Store Team</p>
 
             <div style="margin-top: 30px; padding-top: 20px; border-top: 1px solid #eee; font-size: 14px; color: #666;">
-              <div>Contact us at <a href="mailto:support@yourstore.com" style="color: #666;">support@yourstore.com</a> for further assistance.</div>
+              <div>Contact us at <a href="mailto:support@OhCase!.com" style="color: #666;">support@OhCase!.com</a> for further assistance.</div>
             </div>
           </div>
         </body>

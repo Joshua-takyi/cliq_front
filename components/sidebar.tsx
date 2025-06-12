@@ -1,10 +1,10 @@
 "use client";
 import SignOutDialog from "@/components/SignOutDialog";
+import { ChevronDownIcon } from "@heroicons/react/24/outline";
+import { AnimatePresence, motion } from "framer-motion";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
-import { motion, AnimatePresence } from "framer-motion";
-import { ChevronDownIcon, ChevronUpIcon } from "@heroicons/react/24/outline";
 
 interface SideBarProps {
   isMobile?: boolean;
@@ -24,7 +24,6 @@ export default function SideBar({
     { id: 1, name: "Orders", href: "/profile/order" },
     { id: 2, name: "Address", href: "/profile/address" },
     { id: 3, name: "Personal Info", href: "/profile/personal-info" },
-    { id: 4, name: "Wishlist", href: "/profile/wishlist" },
   ];
 
   const isActive = (href: string) => href === pathName;
@@ -42,19 +41,16 @@ export default function SideBar({
       opacity: 0,
       height: 0,
       transition: {
-        duration: 0.3,
-        ease: "easeInOut",
-        when: "afterChildren",
+        duration: 0.2,
+        ease: "easeOut",
       },
     },
     open: {
       opacity: 1,
       height: "auto",
       transition: {
-        duration: 0.3,
-        ease: "easeInOut",
-        when: "beforeChildren",
-        staggerChildren: 0.05,
+        duration: 0.2,
+        ease: "easeOut",
       },
     },
   };
@@ -62,56 +58,58 @@ export default function SideBar({
   const itemVariants = {
     closed: {
       opacity: 0,
-      x: -20,
-      transition: {
-        duration: 0.2,
-      },
+      y: -8,
     },
     open: {
       opacity: 1,
-      x: 0,
+      y: 0,
       transition: {
-        duration: 0.3,
-        ease: [0.25, 0.1, 0.25, 1.0],
+        duration: 0.15,
+        ease: "easeOut",
       },
     },
   };
 
   if (isMobile) {
     return (
-      <div className="py-2">
+      <div className="border-b border-gray-100">
         <button
           onClick={onToggleDropdown}
-          className="flex items-center justify-between w-full px-4 py-3 text-left hover:bg-gray-50 rounded-md transition-colors duration-200"
+          className="flex items-center justify-between w-full px-5 py-4 text-left"
           aria-expanded={isDropdownOpen}
           aria-label="Toggle profile menu"
         >
-          <span className="font-medium text-gray-900">Profile</span>
-          {isDropdownOpen ? (
-            <ChevronUpIcon className="h-4 w-4 text-gray-500" />
-          ) : (
-            <ChevronDownIcon className="h-4 w-4 text-gray-500" />
-          )}
+          <span className="text-base font-medium text-gray-900">Profile</span>
+          <motion.div
+            animate={{ rotate: isDropdownOpen ? 180 : 0 }}
+            transition={{ duration: 0.2, ease: "easeOut" }}
+          >
+            <ChevronDownIcon className="h-5 w-5 text-gray-400" />
+          </motion.div>
         </button>
 
         <AnimatePresence>
           {isDropdownOpen && (
             <motion.div
-              className="overflow-hidden"
+              className="overflow-hidden bg-gray-50/30"
               variants={dropdownVariants}
               initial="closed"
               animate="open"
               exit="closed"
             >
-              <div className="pl-6 pr-4 py-2 space-y-1">
-                {sidebarItems.map((item) => (
-                  <motion.div key={item.id} variants={itemVariants}>
+              <div className="px-5 py-3">
+                {sidebarItems.map((item, index) => (
+                  <motion.div
+                    key={item.id}
+                    variants={itemVariants}
+                    transition={{ delay: index * 0.03 }}
+                  >
                     <Link
                       href={item.href}
-                      className={`block px-3 py-2 rounded-md text-sm transition-colors duration-200 ${
+                      className={`block py-3 text-sm transition-colors duration-150 ${
                         isActive(item.href)
-                          ? "text-[#9BEC00] bg-green-50 font-medium border-l-2 border-[#9BEC00]"
-                          : "text-gray-700 hover:bg-gray-50 hover:text-gray-900"
+                          ? "text-gray-900 font-medium"
+                          : "text-gray-600"
                       }`}
                     >
                       {item.name}
@@ -119,10 +117,14 @@ export default function SideBar({
                   </motion.div>
                 ))}
 
-                <motion.div variants={itemVariants}>
+                <motion.div
+                  variants={itemVariants}
+                  transition={{ delay: sidebarItems.length * 0.03 }}
+                  className="pt-2 mt-2 border-t border-gray-200"
+                >
                   <button
                     onClick={handleLogoutClick}
-                    className="block px-3 py-2 rounded-md text-sm w-full text-left text-red-600 hover:bg-red-50 transition-colors duration-200"
+                    className="block py-3 text-sm w-full text-left text-gray-500 transition-colors duration-150"
                   >
                     Logout
                   </button>
@@ -174,17 +176,6 @@ export default function SideBar({
               Personal Information
             </Link>
           </li>
-          <li>
-            <Link
-              href="/profile/wishlist"
-              className={`block px-6 py-4 hover:bg-gray-50 transition-colors ${
-                isActive("/profile/wishlist") ? "font-medium" : "text-gray-700"
-              }`}
-            >
-              My Wish
-            </Link>
-          </li>
-
           {/* Logout button - separated at the bottom */}
           <li className="border-t border-gray-200 mt-4">
             <button

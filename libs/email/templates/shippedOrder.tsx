@@ -1,4 +1,12 @@
-import { CalculateDeliveryFee, ConfirmOrderParams, EmailTemplate, formatCurrency, formatOrderDate, formatShippingAddress, generateOrderItemsHTML } from "./processingOrder";
+import {
+  CalculateDeliveryFee,
+  ConfirmOrderParams,
+  EmailTemplate,
+  formatCurrency,
+  formatOrderDate,
+  formatShippingAddress,
+  generateOrderItemsHTML,
+} from "./processingOrder";
 
 export function ShippedOrderTemplate({
   orderId,
@@ -25,13 +33,20 @@ export function ShippedOrderTemplate({
 
             <p>Hi ${customerName || "Customer"},</p>
 
-            <p>Good news! Your order <strong>#${orderId}</strong> placed on ${formatOrderDate(orderDate)} has been shipped and is on its way to you.</p>
+            <p>Good news! Your order <strong>#${orderId}</strong> placed on ${formatOrderDate(
+      orderDate
+    )} has been shipped and is on its way to you.</p>
 
             <div style="margin: 20px 0;">
               <div><strong>Order ID:</strong> ${orderId}</div>
               <div><strong>Date:</strong> ${formatOrderDate(orderDate)}</div>
-              <div><strong>Total:</strong> ${formatCurrency(total, currency)}</div>
-              <div><strong>Delivery Fee:</strong> ${CalculateDeliveryFee(shippingInfo.region || " ")}</div>
+              <div><strong>Total:</strong> ${formatCurrency(
+                total,
+                currency
+              )}</div>
+              <div><strong>Delivery Fee:</strong> ${CalculateDeliveryFee(
+                shippingInfo.region || " "
+              )}</div>
             </div>
 
             <div style="margin: 20px 0;">
@@ -53,7 +68,7 @@ export function ShippedOrderTemplate({
             <p style="margin: 0;">Thank you for shopping with us,<br>Your Store Team</p>
 
             <div style="margin-top: 30px; padding-top: 20px; border-top: 1px solid #eee; font-size: 14px; color: #666;">
-              <div>Need help? Email us at <a href="mailto:support@yourstore.com" style="color: #666;">support@yourstore.com</a></div>
+              <div>Need help? Email us at <a href="mailto:support@OhCase!.com" style="color: #666;">support@OhCase!.com</a></div>
             </div>
           </div>
         </body>
