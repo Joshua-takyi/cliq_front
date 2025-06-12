@@ -10,10 +10,6 @@ export default function Order() {
   // Enhanced pagination configuration - controls both orders per page and items per order
   const itemsPerPage = 2; // Number of orders to show per page
   const maxItemsPerOrder = 1; // Show only 1 item for multi-item orders to keep UI clean and consistent
-  // Note: This setting ensures that:
-  // - Single-item orders show the 1 item
-  // - Multi-item orders show only 1 item with "View all items" link
-  // - UI remains clean and pagination-friendly
   const [currentPage, setCurrentPage] = useState(1); // Current page number starting from 1
 
   const { getOrder } = useOrder();
@@ -155,7 +151,6 @@ export default function Order() {
                 </div>
               </div>
             )}
-            {/* Pass maxItemsToShow prop to control item-level pagination */}
             <OrderCard {...order} maxItemsToShow={maxItemsPerOrder} />
           </div>
         ))}

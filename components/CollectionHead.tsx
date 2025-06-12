@@ -1,17 +1,35 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { use, useEffect, useState } from "react";
 import { conditionalHeader } from "@/-database/db";
 
 interface SlugPageProps {
-  params: { slug: string };
+  params: Promise<{ slug: string }> | { slug: string };
 }
 
 const CollectionHeader = ({ params }: SlugPageProps) => {
   const [header, setHeader] = useState<
     { header: string; description: string } | undefined
   >();
-  const slug = params.slug;
+
+  // Properly handle Promise-based params using React.use() for Next.js compatibility
+  const [slug, setSlug] = useState<string>("");
+
+  useEffect(() => {
+    const getSlug = async () => {
+      // Check if params is a Promise by examining its structure
+      if (params && typeof params === "object" && "then" in params) {
+        // It's a Promise, unwrap it using React.use() for proper Next.js compatibility
+        const resolvedParams = use(params);
+        setSlug(resolvedParams.slug);
+      } else if (params && "slug" in params) {
+        // It's a direct object - for backward compatibility with legacy Next.js versions
+        setSlug((params as { slug: string }).slug);
+      }
+    };
+
+    getSlug();
+  }, [params]);
 
   useEffect(() => {
     const matchingHeader = conditionalHeader.find(

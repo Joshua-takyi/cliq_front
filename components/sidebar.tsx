@@ -25,7 +25,6 @@ export default function SideBar({
     { id: 2, name: "Address", href: "/profile/address" },
     { id: 3, name: "Personal Info", href: "/profile/personal-info" },
     { id: 4, name: "Wishlist", href: "/profile/wishlist" },
-    { id: 5, name: "Reviews", href: "/profile/product-review" },
   ];
 
   const isActive = (href: string) => href === pathName;
@@ -185,19 +184,6 @@ export default function SideBar({
               My Wish
             </Link>
           </li>
-          <li>
-            <Link
-              href="/profile/product-review"
-              className={`block px-6 py-4 hover:bg-gray-50 transition-colors ${
-                isActive("/profile/product-review")
-                  ? "font-medium"
-                  : "text-gray-700"
-              }`}
-            >
-              Product Reviews
-            </Link>
-          </li>
-          {/* Additional menu items to match the reference image */}
 
           {/* Logout button - separated at the bottom */}
           <li className="border-t border-gray-200 mt-4">

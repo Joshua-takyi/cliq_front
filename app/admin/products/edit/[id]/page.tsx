@@ -1,5 +1,6 @@
 "use client";
 
+import { use } from "react";
 import Loader from "@/app/loading";
 import ProductForm from "@/components/form";
 import { useProduct } from "@/hooks/useProduct";
@@ -9,8 +10,14 @@ import { useParams } from "next/navigation";
 // import { useEffect } from "react";
 
 function EditProductContainer() {
-  const { id } = useParams();
-  const productId = id as string; // Ensure productId is a string
+  // Get params from useParams hook and properly unwrap if it's a Promise
+  const params = useParams();
+  // Unwrap params using React.use() for Next.js compatibility with async params
+  // Using 'unknown' first to handle the type conversion safely
+  const resolvedParams = use(params as unknown as Promise<{ id: string }>);
+  const { id } = resolvedParams;
+
+  const productId = id as string; // Ensure productId is a string for proper type safety
   const { getProductById } = useProduct();
 
   const { data: product, isLoading, isError } = getProductById(productId);

@@ -1,28 +1,3 @@
-/**
- * OrderCard Component - Smart Item Display for Clean Pagination
- *
- * This component intelligently manages item display based on order size:
- *
- * 1. Single-item orders: Shows the complete item
- * 2. Multi-item orders: Shows only 1 item with "View all items" link
- * 3. Clean pagination: Prevents UI overflow and maintains consistent layout
- * 4. User-friendly navigation: Clear path to view complete orders
- *
- * Key Features:
- * - Smart display logic: Adapts based on item count
- * - "More items" indicator: Shows remaining item count
- * - Direct navigation: Link to complete order view
- * - Responsive design: Works on all screen sizes
- *
- * Usage:
- * <OrderCard {...orderData} maxItemsToShow={1} />
- *
- * Display Strategy:
- * - 1 item order: Shows 1 item (complete)
- * - 2+ item orders: Shows 1 item + "View all items" link
- * - This ensures consistent UI height and clean pagination
- */
-
 import ResponsiveLazyImage from "@/components/lazyImage";
 import Link from "next/link";
 
@@ -112,7 +87,7 @@ const ItemCard = ({
     : "Date unavailable";
 
   return (
-    <Link href={`/profile/orders/${item.slug}`} className="block">
+    <Link href={`/profile/order/${orderInfo.orderId}`} className="block">
       {/* Individual Item Card - compact and focused on a single item */}
       <div className="block no-underline border border-gray-200 rounded-lg p-4 lg:p-5 ">
         {/* Item Header with Order Info - Compact but informative */}
@@ -124,7 +99,7 @@ const ItemCard = ({
             </p>
             <span
               className={`inline-block px-2 py-1 text-xs font-medium rounded-full border ${getStatusStyle(
-                orderInfo.status
+                orderInfo.status,
               )}`}
             >
               {orderInfo.status.charAt(0).toUpperCase() +
@@ -245,11 +220,6 @@ const OrderCard = ({
     createdAt,
   };
 
-  // Render strategy:
-  // - Single item orders: Show the item without "more items" indicator
-  // - Multi-item orders: Show first item + "View all items" link for remaining items
-
-  // Render individual item cards with pagination control - only show specified number of items
   return (
     <div className="space-y-3">
       {/* Display limited number of item cards based on maxItemsToShow prop */}

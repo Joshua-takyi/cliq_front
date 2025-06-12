@@ -5,7 +5,11 @@ import ProductDisplay from "@/components/product/ProductDisplay";
 import Loader from "@/app/loading";
 
 const ProductPage = () => {
-  const { slug } = useParams();
+  // Get params directly from useParams hook - it returns synchronous object in App Router
+  const params = useParams();
+  // Extract slug from params object directly - no need for React.use() since params is not a Promise
+  const slug = params?.slug as string;
+
   const {
     data: product,
     isLoading,

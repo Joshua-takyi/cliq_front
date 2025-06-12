@@ -207,7 +207,7 @@ export const Nav = () => {
               {isAdmin && (
                 <motion.li key="admin" variants={itemVariants}>
                   <Link
-                    href="/admin/products"
+                    href="/admin"
                     className="md:p-1 lg:p-2 relative group text-blue-700 font-medium"
                   >
                     <span className="md:text-sm lg:text-base">Admin</span>

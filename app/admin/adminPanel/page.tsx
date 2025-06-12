@@ -95,8 +95,8 @@ export default function AdminPanel() {
       // Update local state with the new role
       setUsers((prevUsers) =>
         prevUsers.map((user) =>
-          user.id === userId ? { ...user, role: newRole } : user
-        )
+          user.id === userId ? { ...user, role: newRole } : user,
+        ),
       );
 
       // Show success message
@@ -197,8 +197,8 @@ export default function AdminPanel() {
                             user.role === "admin"
                               ? "bg-purple-100 text-purple-800"
                               : user.role === "editor"
-                              ? "bg-green-100 text-green-800"
-                              : "bg-blue-100 text-blue-800"
+                                ? "bg-green-100 text-green-800"
+                                : "bg-blue-100 text-blue-800"
                           }`}
                         >
                           {user.role}

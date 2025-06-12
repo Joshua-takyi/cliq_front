@@ -1,7 +1,6 @@
 "use client";
 
 import { useSession } from "next-auth/react";
-// import { useSession } from "next-auth/react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 
@@ -15,21 +14,32 @@ export default function AdminLayout({
     { name: "Dashboard", href: "/admin" },
     { name: "Products", href: "/admin/products" },
     { name: "Orders", href: "/admin/orders" },
-    { name: "Customers", href: "/admin/customers" },
-    { name: "Admin Panel", href: "/admin/adminPanel" },
+    // { name: "Admin Panel", href: "/admin/adminPanel" },
   ];
 
   const router = useRouter();
   const session = useSession();
 
-  if (session.data?.user.role !== "admin") {
-    router.push("/"); // Redirect to home if not admin
+  // Check if the session is loading
+  if (session.status === "loading") {
+    return <div>Loading...</div>;
   }
+
+  // Redirect if the user is not authenticated or not an admin
+  if (
+    session.status === "unauthenticated" ||
+    session.data?.user.role !== "admin"
+  ) {
+    router.push("/"); // Redirect to home if not admin
+    return null; // Prevent rendering the rest of the component
+  }
+
   const isActive = (href: string) => href === pathname;
+
   return (
     <div className="min-h-screen bg-gray-50">
       <nav className="bg-white shadow-sm p-2">
-        <div className="max-w-7xl mx-auto px-4">
+        <div className="max-w-[90rem] mx-auto px-4">
           <div className="flex justify-between h-16">
             <div className="flex">
               <div className="flex-shrink-0 flex items-center">
@@ -65,7 +75,7 @@ export default function AdminLayout({
         </div>
       </nav>
 
-      <main className="max-w-7xl mx-auto px-4 py-6 sm:px-6 lg:px-8">
+      <main className="max-w-[90rem] mx-auto lg:px-4 px-2 py-6 sm:px-6 ">
         {children}
       </main>
     </div>

@@ -6,7 +6,8 @@ export default function ProfileLayout({
   children,
 }: {
   children: React.ReactNode;
-  params: any;
+  // Updated params type to Promise for Next.js compatibility - not used in this layout
+  params: Promise<any>;
 }) {
   return (
     <>

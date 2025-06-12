@@ -1,7 +1,15 @@
-import React from "react";
+import AdminDashboard from "./dashboard";
+import { Metadata } from "next";
 
-const AdminPpage = () => {
-  return <div>AdminPpage</div>;
+export const metadata: Metadata = {
+  title: "Admin Dashboard",
+  description: "Admin dashboard  ,for ecommerce store",
+  keywords: "admin, dashboard, ecommerce",
 };
-
-export default AdminPpage;
+export default function AdminDashboardPage() {
+  return (
+    <div>
+      <AdminDashboard />
+    </div>
+  );
+}

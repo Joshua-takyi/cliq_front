@@ -20,7 +20,7 @@ export const useAdminProducts = (page = 1, limit = 20) => {
     queryFn: async () => {
       // Make the API request to get products
       const res = await axios.get(
-        `${API_URL}/products?limit=${limit}&page=${page}`
+        `${API_URL}/products?limit=${limit}&page=${page}`,
       );
       if (!res.data) {
         throw new Error("No data found");

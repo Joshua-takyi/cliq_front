@@ -1,40 +1,49 @@
+"use client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { useReviews } from "@/hooks/useReviews";
+import { useSession } from "next-auth/react";
 import { useState } from "react";
 import { toast } from "sonner";
 
-export default function AddReview() {
+export default function AddReview({ id }: { id: string }) {
+  const { data: session } = useSession();
+
+  const defaultEmail = session?.user?.email || "";
+  const defaultName = session?.user?.name || "";
   const [reviewText, setReviewText] = useState<string>("");
   const [reviewRating, setReviewRating] = useState<number>(5);
-  const [reviewName, setReviewName] = useState<string>("");
-  const [reviewEmail, setReviewEmail] = useState<string>("");
+  const [reviewName, setReviewName] = useState<string>(defaultName);
+  const [reviewEmail, setReviewEmail] = useState<string>(defaultEmail);
   const [isSubmittingReview, setIsSubmittingReview] = useState(false);
 
   // Function to handle review submission
+
+  const { addReview } = useReviews();
+  const { mutate } = addReview;
   const handleReviewSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
     setIsSubmittingReview(true);
 
     try {
-      // Simulating an API call for review submission
-      await new Promise((resolve) => setTimeout(resolve, 1000));
-
-      // console.log("Review submitted:", {
-      //   productId: product.id,
-      //   rating: reviewRating,
-      //   text: reviewText,
-      //   name: reviewName,
-      //   email: reviewEmail,
-      //   date: new Date().toISOString(),
-      // });
-
-      // Reset form after successful submission
+      //validate form
+      if (!reviewText || !reviewName || !reviewEmail || !reviewRating) {
+        toast.error("Please fill all required fields", {
+          richColors: false,
+        });
+        return;
+      }
+      mutate({
+        product_id: id,
+        rating: reviewRating,
+        user_name: reviewName,
+        comment: reviewText,
+        user_email: reviewEmail,
+      });
       setReviewText("");
       setReviewRating(5);
-      setReviewName("");
-      setReviewEmail("");
 
       toast.success("Review submitted successfully!", {
         richColors: false,

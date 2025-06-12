@@ -1,5 +1,6 @@
 "use client";
 
+import { use } from "react";
 import { useParams } from "next/navigation";
 import { useState, useEffect } from "react";
 import { Filter, X } from "lucide-react";
@@ -11,7 +12,10 @@ import ProductFilter from "@/components/ProductFilter";
 export default function CollectionPage() {
   // Get the slug from the URL parameters to identify which collection we're viewing
   const params = useParams();
-  const slug = params.slug as string;
+  // Unwrap params Promise using React.use() for compatibility with Next.js latest versions
+  // Using 'unknown' first to handle the type conversion safely
+  // const resolvedParams = use(params as unknown as Promise<{ slug: string }>);
+  // const slug = resolvedParams.slug as string;
 
   // State for mobile filter panel visibility - simplified state management
   const [isMobileFilterOpen, setIsMobileFilterOpen] = useState(false);
@@ -55,7 +59,7 @@ export default function CollectionPage() {
   return (
     <div className="max-w-[100rem] mx-auto px-4 py-8">
       {/* Collection header displays collection-specific information */}
-      <CollectionHeader params={{ slug }} />
+      {/* <CollectionHeader params={{ slug }} /> */}
 
       {/* Mobile Filter Button - Enhanced with smooth hover animation */}
       <div className="lg:hidden mb-4">
