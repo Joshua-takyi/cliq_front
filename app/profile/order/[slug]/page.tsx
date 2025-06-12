@@ -25,7 +25,7 @@ export default function OrderPage({ params }: OrderPageProps) {
 
   // State for managing which item's review form is currently shown
   const [showReviewForItem, setShowReviewForItem] = useState<string | null>(
-    null
+    null,
   );
 
   const toggleReviewForm = (itemId: string) => {
@@ -106,7 +106,7 @@ export default function OrderPage({ params }: OrderPageProps) {
   const totalAmount = order.items.reduce(
     (total: number, item: any) =>
       total + parseFloat(item.price) * parseInt(item.quantity),
-    0
+    0,
   );
 
   // Format date for better readability
@@ -129,10 +129,10 @@ export default function OrderPage({ params }: OrderPageProps) {
               order.status === "delivered"
                 ? "bg-green-100 text-green-800"
                 : order.status === "shipped"
-                ? "bg-blue-100 text-blue-800"
-                : order.status === "processing"
-                ? "bg-yellow-100 text-yellow-800"
-                : "bg-gray-100 text-gray-800"
+                  ? "bg-blue-100 text-blue-800"
+                  : order.status === "processing"
+                    ? "bg-yellow-100 text-yellow-800"
+                    : "bg-gray-100 text-gray-800"
             }`}
           >
             {order.status}
